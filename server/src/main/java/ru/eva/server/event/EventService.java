@@ -2,6 +2,7 @@ package ru.eva.server.event;
 
 
 import org.springframework.stereotype.Service;
+import ru.eva.exception.EventNotFoundException;
 import ru.eva.server.event.dto.CreateEventRequest;
 import ru.eva.server.event.dto.EventResponse;
 import ru.eva.server.event.dto.FormFieldRequest;
@@ -36,32 +37,39 @@ public class EventService {
                 now,
                 now
         );
-
         for (int i = 0; i < request.formFields().size(); i++){
             FormFieldRequest fieldRequest = request.formFields().get(i);
             event.addFormField(fieldRequest.label(), i);
         }
-
         Event savedEvent = eventRepository.save(event);
+        return eventToResponse(savedEvent);
+    }
+
+    public EventResponse get(Long id){
+        Event event = eventRepository.findById(id).orElseThrow(()-> new EventNotFoundException(id));
+        return eventToResponse(event);
+    }
+
+    private EventResponse eventToResponse(Event event){
         List<EventResponse.FormField> formFields = new ArrayList<>();
 
-        for (FormField field : savedEvent.getFormFields()) {
+        for (FormField field : event.getFormFields()) {
             EventResponse.FormField responseField = new EventResponse.FormField(
-                            field.getId(),
-                            field.getLabel(),
-                            field.getPosition());
+                    field.getId(),
+                    field.getLabel(),
+                    field.getPosition());
             formFields.add(responseField);
         }
 
         return new EventResponse(
-                savedEvent.getId(),
-                savedEvent.getTitle(),
-                savedEvent.getDescription(),
-                savedEvent.getStartsAt(),
-                savedEvent.getEndsAt(),
-                savedEvent.getLocation(),
-                savedEvent.getCapacity(),
-                savedEvent.getStatus(),
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getStartsAt(),
+                event.getEndsAt(),
+                event.getLocation(),
+                event.getCapacity(),
+                event.getStatus(),
                 formFields
         );
     }
