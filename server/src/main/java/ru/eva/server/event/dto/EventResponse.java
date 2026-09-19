@@ -1,4 +1,6 @@
-package ru.eva.server.event;
+package ru.eva.server.event.dto;
+
+import ru.eva.server.event.model.EventStatus;
 
 import java.time.OffsetDateTime;
 import java.util.List;

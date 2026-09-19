@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.eva.server.event.dto.CreateEventRequest;
+import ru.eva.server.event.dto.EventResponse;
 
 @RestController
 @RequestMapping("/api/events")

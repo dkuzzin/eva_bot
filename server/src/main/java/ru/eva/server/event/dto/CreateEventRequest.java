@@ -1,4 +1,4 @@
-package ru.eva.server.event;
+package ru.eva.server.event.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;

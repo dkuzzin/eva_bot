@@ -1,8 +1,13 @@
 package ru.eva.server.event;
 
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import ru.eva.server.event.dto.CreateEventRequest;
+import ru.eva.server.event.dto.EventResponse;
+import ru.eva.server.event.dto.FormFieldRequest;
+import ru.eva.server.event.model.Event;
+import ru.eva.server.event.model.EventStatus;
+import ru.eva.server.event.model.FormField;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;

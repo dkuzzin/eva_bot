@@ -1,4 +1,4 @@
-package ru.eva.server.event;
+package ru.eva.server.event.model;
 
 public enum EventStatus {
     OPEN,
