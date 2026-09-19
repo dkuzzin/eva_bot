@@ -1,0 +1,63 @@
+package ru.eva.server.event;
+
+
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class EventService {
+    private final EventRepository eventRepository;
+
+    public EventService(EventRepository eventRepository){
+        this.eventRepository = eventRepository;
+    }
+
+    public EventResponse create(CreateEventRequest request){
+
+        OffsetDateTime now = OffsetDateTime.now();
+        Event event = new Event(
+                1L,
+                request.title(),
+                request.description(),
+                request.startsAt(),
+                request.endsAt(),
+                request.location(),
+                request.capacity(),
+                EventStatus.OPEN,
+                now,
+                now
+        );
+
+        for (int i = 0; i < request.formFields().size(); i++){
+            FormFieldRequest fieldRequest = request.formFields().get(i);
+            event.addFormField(fieldRequest.label(), i);
+        }
+
+        Event savedEvent = eventRepository.save(event);
+        List<EventResponse.FormField> formFields = new ArrayList<>();
+
+        for (FormField field : savedEvent.getFormFields()) {
+            EventResponse.FormField responseField = new EventResponse.FormField(
+                            field.getId(),
+                            field.getLabel(),
+                            field.getPosition());
+            formFields.add(responseField);
+        }
+
+        return new EventResponse(
+                savedEvent.getId(),
+                savedEvent.getTitle(),
+                savedEvent.getDescription(),
+                savedEvent.getStartsAt(),
+                savedEvent.getEndsAt(),
+                savedEvent.getLocation(),
+                savedEvent.getCapacity(),
+                savedEvent.getStatus(),
+                formFields
+        );
+    }
+}
