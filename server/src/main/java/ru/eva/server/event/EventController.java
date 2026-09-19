@@ -1,5 +1,6 @@
 package ru.eva.server.event;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import ru.eva.server.event.dto.CreateEventRequest;
 import ru.eva.server.event.dto.EventResponse;
@@ -13,7 +14,7 @@ public class EventController {
     }
 
     @PostMapping
-    public EventResponse create(@RequestBody CreateEventRequest request) {
+    public EventResponse create(@Valid @RequestBody CreateEventRequest request) {
         return service.create(request);
     }
 

@@ -1,14 +1,19 @@
 package ru.eva.server.event.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 
 public record CreateEventRequest(
-        String title,
+        @NotBlank String title,
         String description,
-        OffsetDateTime startsAt,
+        @NotNull OffsetDateTime startsAt,
         OffsetDateTime endsAt,
         String location,
-        Integer capacity,
-        List<FormFieldRequest> formFields
+        @Positive Integer capacity,
+        @NotNull @Valid List<FormFieldRequest> formFields
 ){ }

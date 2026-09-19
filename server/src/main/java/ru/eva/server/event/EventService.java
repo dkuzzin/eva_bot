@@ -1,8 +1,8 @@
 package ru.eva.server.event;
 
-
 import org.springframework.stereotype.Service;
 import ru.eva.exception.EventNotFoundException;
+import ru.eva.exception.InvalidEventArgumentsException;
 import ru.eva.server.event.dto.CreateEventRequest;
 import ru.eva.server.event.dto.EventResponse;
 import ru.eva.server.event.dto.FormFieldRequest;
@@ -22,7 +22,13 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
+    private void validateBusinessRules(CreateEventRequest request){
+        if (request.endsAt() != null && !request.endsAt().isAfter(request.startsAt())){
+            throw new InvalidEventArgumentsException("endsAt must be after startsAt");
+        }
+    }
     public EventResponse create(CreateEventRequest request){
+        validateBusinessRules(request);
 
         OffsetDateTime now = OffsetDateTime.now();
         Event event = new Event(
