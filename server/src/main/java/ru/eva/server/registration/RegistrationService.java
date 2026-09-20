@@ -3,7 +3,9 @@ package ru.eva.server.registration;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import ru.eva.exception.EventNotFoundException;
+import ru.eva.exception.InvalidRegistrationException;
 import ru.eva.exception.RegistrationNotAllowedException;
+import ru.eva.exception.RegistrationNotFoundException;
 import ru.eva.server.event.EventRepository;
 import ru.eva.server.event.model.Event;
 import ru.eva.server.event.model.EventStatus;
@@ -68,14 +70,20 @@ public class RegistrationService {
     private void validateAnswers(Event event, RegistrationRequest request) {
         Set<Long> answeredFields = new HashSet<>();
         if (request.answers().size() != event.getFormFields().size()) {
-            throw new RegistrationNotAllowedException("Wrong number of answers");
+            throw new InvalidRegistrationException(
+                    "INVALID_REGISTRATION_FORM",
+                    "Wrong number of answers"
+            );
         }
 
         for (RegistrationRequest.Answer answer : request.answers()) {
             boolean fieldExists = false;
 
             if (!answeredFields.add(answer.fieldId())) {
-                throw new RegistrationNotAllowedException("Duplicate answer for form field");
+                throw new InvalidRegistrationException(
+                        "DUPLICATE_FORM_FIELD",
+                        "Duplicate answer for form field"
+                );
             }
 
             for (FormField field : event.getFormFields()) {
@@ -86,21 +94,29 @@ public class RegistrationService {
             }
 
             if (!fieldExists) {
-                throw new RegistrationNotAllowedException("Form field does not belong to this event");
+                throw new InvalidRegistrationException(
+                        "FORM_FIELD_DOESNT_EXIST",
+                        "Form field does not belong to this event");
             }
         }
     }
 
     private void validateRegistration(Event event, Long maxUserId){
         if (event.getStatus() != EventStatus.OPEN){
-            throw new RegistrationNotAllowedException("Event status must be OPEN");
+            throw new RegistrationNotAllowedException(
+                    "EVENT_NOT_OPEN",
+                    "Event status must be OPEN"
+            );
         }
 
         Optional<Registration> existingRegistration =
                 registrationRepository.findByEventIdAndMaxUserId(event.getId(), maxUserId);
 
         if (existingRegistration.isPresent()) {
-            throw new RegistrationNotAllowedException("User is already registered");
+            throw new RegistrationNotAllowedException(
+                    "ALREADY_REGISTERED",
+                    "User is already registered"
+            );
         }
         //TODO fix maxuser id and add validation
         if (event.getCapacity() != null) {
@@ -108,8 +124,34 @@ public class RegistrationService {
                     registrationRepository.countByEventId(event.getId());
 
             if (registeredCount >= event.getCapacity()) {
-                throw new RegistrationNotAllowedException("Event capacity is full");
+                throw new RegistrationNotAllowedException(
+                        "EVENT_CAPACITY_FULL",
+                        "Event capacity is full"
+                );
             }
         }
+    }
+
+    @Transactional
+    public void cancelRegistration(Long eventId) {
+        Long maxUserId = 1L;
+
+        Registration registration =
+                registrationRepository.findByEventIdAndMaxUserId(eventId, maxUserId)
+                        .orElseThrow(RegistrationNotFoundException::new);
+        registrationRepository.delete(registration);
+    }
+
+    public RegistrationResponse getRegistration(Long eventId) {
+        Long maxUserId = 1L;
+
+        Registration registration = registrationRepository.findByEventIdAndMaxUserId(eventId, maxUserId)
+                .orElseThrow(() -> new RegistrationNotFoundException());
+
+        return new RegistrationResponse(
+                registration.getId(),
+                registration.getEventId(),
+                registration.getRegisteredAt()
+        );
     }
 }

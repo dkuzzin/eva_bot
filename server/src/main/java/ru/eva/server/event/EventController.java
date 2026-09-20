@@ -1,6 +1,7 @@
 package ru.eva.server.event;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.eva.server.event.dto.CreateEventRequest;
 import ru.eva.server.event.dto.EventResponse;
@@ -35,5 +36,19 @@ public class EventController {
             @Valid @RequestBody RegistrationRequest request)
     {
         return registrationService.registration(eventId, request);
+    }
+
+
+    @DeleteMapping("/{eventId}/registrations")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelRegistration(@PathVariable Long eventId) {
+        registrationService.cancelRegistration(eventId);
+    }
+
+    @GetMapping("/{eventId}/registrations/me")
+    public RegistrationResponse getRegistration(
+            @PathVariable Long eventId
+    ) {
+        return registrationService.getRegistration(eventId);
     }
 }
