@@ -20,23 +20,17 @@ public class Registration {
     @Column(name = "registered_at", nullable = false)
     private OffsetDateTime registeredAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RegistrationStatus status;
-
     protected Registration() {
     }
 
     public Registration(
             Long eventId,
             Long maxUserId,
-            OffsetDateTime registeredAt,
-            RegistrationStatus status
+            OffsetDateTime registeredAt
     ) {
         this.eventId = eventId;
         this.maxUserId = maxUserId;
         this.registeredAt = registeredAt;
-        this.status = status;
     }
 
     public Long getId() {
@@ -53,9 +47,5 @@ public class Registration {
 
     public OffsetDateTime getRegisteredAt() {
         return registeredAt;
-    }
-
-    public RegistrationStatus getStatus() {
-        return status;
     }
 }
