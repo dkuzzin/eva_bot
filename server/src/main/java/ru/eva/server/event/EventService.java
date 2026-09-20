@@ -24,7 +24,10 @@ public class EventService {
 
     private void validateBusinessRules(CreateEventRequest request){
         if (request.endsAt() != null && !request.endsAt().isAfter(request.startsAt())){
-            throw new InvalidEventArgumentsException("endsAt must be after startsAt");
+            throw new InvalidEventArgumentsException(
+                    "INVALID_EVENT_TIME_RANGE",
+                    "endsAt must be after startsAt"
+            );
         }
     }
     public EventResponse create(CreateEventRequest request){

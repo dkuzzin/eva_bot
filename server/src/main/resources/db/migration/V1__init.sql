@@ -36,7 +36,6 @@ CREATE TABLE registrations(
     event_id BIGINT NOT NULL,
     max_user_id BIGINT NOT NULL,
     registered_at TIMESTAMPTZ NOT NULL,
-    status VARCHAR(32) NOT NULL,
 
     CONSTRAINT fk_registrations_event
         FOREIGN KEY (event_id)

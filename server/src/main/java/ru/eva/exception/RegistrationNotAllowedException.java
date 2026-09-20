@@ -1,14 +1,13 @@
 package ru.eva.exception;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-public class InvalidEventArgumentsException extends RuntimeException {
-    private final String code;
+public class RegistrationNotAllowedException extends RuntimeException {
 
-    public InvalidEventArgumentsException(String code, String message) {
-        super("Invalid argument: " + message);
+    private final String code;
+    public RegistrationNotAllowedException(String code, String message) {
+        super(message);
         this.code = code;
     }
 

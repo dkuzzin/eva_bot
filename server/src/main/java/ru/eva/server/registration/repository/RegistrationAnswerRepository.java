@@ -1,4 +1,4 @@
-package ru.eva.server.registration;
+package ru.eva.server.registration.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.eva.server.registration.model.RegistrationAnswer;
