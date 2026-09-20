@@ -1,5 +1,6 @@
 package ru.eva.server.error;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -71,5 +72,19 @@ public class ApiExceptionHandler {
         ApiError error = new ApiError("VALIDATION_ERROR", "Request validation failed", fields);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(
+            DataIntegrityViolationException exception
+    ) {
+        ApiError error = new ApiError(
+                "DATA_INTEGRITY_VIOLATION",
+                "Database constraint was violated"
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
     }
 }
