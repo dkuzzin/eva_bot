@@ -2,53 +2,86 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
+	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
+	"time"
 
-	maxbot "github.com/max-messenger/max-bot-api-client-go"
-	"github.com/max-messenger/max-bot-api-client-go/schemes"
+	maxbot "github.com/max-messenger/max-bot-api-client-go/v2"
+	"github.com/max-messenger/max-bot-api-client-go/v2/model"
 )
 
 func main() {
-	api, err := maxbot.New(os.Getenv("TOKEN"))
-	if err != nil {
-		panic(err)
+	botToken := os.Getenv("BOT_TOKEN")
+	webhookSecret := os.Getenv("WEBHOOK_SECRET")
+
+	if botToken == "" {
+		log.Fatal("BOT_TOKEN is not set")
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	info, err := api.Bots.GetBot(ctx)
-	if err != nil {
-		panic(err)
+	if webhookSecret == "" {
+		log.Fatal("WEBHOOK_SECRET is not set")
 	}
 
-	fmt.Printf("Get me: %#v\n", info)
+	opts := []maxbot.Opt{
+		maxbot.WithHTTPClient(&http.Client{
+			Timeout: 10 * time.Second,
+		}),
+	}
 
-	go func() {
-		exit := make(chan os.Signal, 1)
+	api, err := maxbot.NewApi(botToken, opts...)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		signal.Notify(exit, os.Interrupt, syscall.SIGTERM)
+	ctx := context.Background()
 
-		<-exit
-		cancel()
-	}()
+	info, err := api.Bots.GetMyInfo(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	for upd := range api.GetUpdates(ctx) {
-		switch upd := upd.(type) {
-		case *schemes.MessageCreatedUpdate:
-			err := api.Messages.Send(
-				ctx,
-				maxbot.NewMessage().
-					SetChat(upd.Message.Recipient.ChatId).
-					SetText("Hello from Bot"),
-			)
+	log.Printf("bot started: %+v", info)
 
+	handle := func(ctx context.Context, update model.Update) {
+		log.Printf(
+			"received update: type=%s chat=%d user=%d",
+			update.UpdateType,
+			update.ChatID,
+			update.UserID,
+		)
+
+		switch update.UpdateType {
+		case model.UpdateMessageCreated:
+			msg := maxbot.NewMessage().
+				SetChat(update.ChatID).
+				SetText("67")
+
+			_, err := api.Messages.Send(ctx, msg)
 			if err != nil {
-				fmt.Println("send error:", err)
+				log.Printf("failed to send message: %v", err)
 			}
 		}
+	}
+
+	webhookHandler := api.GetHandler(
+		handle,
+		webhookSecret,
+	)
+
+	mux := http.NewServeMux()
+
+	mux.Handle("/webhook", webhookHandler)
+
+	server := &http.Server{
+		Addr:              ":8081",
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	log.Println("webhook server listening on :8081")
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatal(err)
 	}
 }
