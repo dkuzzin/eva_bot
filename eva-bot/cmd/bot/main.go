@@ -55,7 +55,7 @@ func main() {
 		case model.UpdateMessageCreated:
 			msg := maxbot.NewMessage().
 				SetChat(update.ChatID).
-				SetText("Hello from EVA bot")
+				SetText("67")
 
 			_, err := api.Messages.Send(ctx, msg)
 			if err != nil {
