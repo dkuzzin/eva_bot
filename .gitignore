@@ -1,1 +1,9 @@
-/.env
+.env
+
+# Maven
+**/target/
+
+# Eclipse
+**/.classpath
+**/.project
+**/.settings/

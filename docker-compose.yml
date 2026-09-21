@@ -21,7 +21,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/eva
       SPRING_DATASOURCE_USERNAME: danil
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
       db:
         condition: service_healthy
