@@ -26,5 +26,15 @@ services:
       db:
         condition: service_healthy
 
+  bot:
+    build:
+      context: ./eva-bot
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+    ports:
+      - "127.0.0.1:8081:8081"
+    restart: unless-stopped
+
 volumes:
   postgres_data:
