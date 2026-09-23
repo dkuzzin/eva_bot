@@ -4,82 +4,76 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	maxbot "github.com/max-messenger/max-bot-api-client-go/v2"
-	"github.com/max-messenger/max-bot-api-client-go/v2/model"
+
+	"github.com/dkuzzin/eva_bot/internal/bot"
+	"github.com/dkuzzin/eva_bot/internal/config"
+)
+
+const (
+	webhookPath = "/webhook"
+
+	httpClientTimeout = 10 * time.Second
+	readHeaderTimeout = 5 * time.Second
 )
 
 func main() {
-	botToken := os.Getenv("BOT_TOKEN")
-	webhookSecret := os.Getenv("WEBHOOK_SECRET")
-
-	if botToken == "" {
-		log.Fatal("BOT_TOKEN is not set")
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	if webhookSecret == "" {
-		log.Fatal("WEBHOOK_SECRET is not set")
-	}
-
-	opts := []maxbot.Opt{
+	api, err := maxbot.NewApi(
+		cfg.BotToken,
 		maxbot.WithHTTPClient(&http.Client{
-			Timeout: 10 * time.Second,
+			Timeout: httpClientTimeout,
 		}),
-	}
-
-	api, err := maxbot.NewApi(botToken, opts...)
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	ctx := context.Background()
 
-	info, err := api.Bots.GetMyInfo(ctx)
+	botInfo, err := api.Bots.GetMyInfo(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("bot started: %+v", info)
+	log.Printf(
+		"bot started: id=%d username=%s",
+		botInfo.UserID,
+		botInfo.Username,
+	)
 
-	handle := func(ctx context.Context, update model.Update) {
-		log.Printf(
-			"received update: type=%s chat=%d user=%d",
-			update.UpdateType,
-			update.ChatID,
-			update.UserID,
-		)
-
-		switch update.UpdateType {
-		case model.UpdateMessageCreated:
-			msg := maxbot.NewMessage().
-				SetChat(update.ChatID).
-				SetText("67")
-
-			_, err := api.Messages.Send(ctx, msg)
-			if err != nil {
-				log.Printf("failed to send message: %v", err)
-			}
-		}
-	}
-
-	webhookHandler := api.GetHandler(
-		handle,
-		webhookSecret,
+	updateHandler := bot.NewHandler(
+		api.Messages,
+		botInfo.UserID,
+		botInfo.Username,
 	)
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/webhook", webhookHandler)
+	mux.Handle(
+		webhookPath,
+		api.GetHandler(
+			updateHandler.HandleUpdate,
+			cfg.WebhookSecret,
+		),
+	)
 
 	server := &http.Server{
-		Addr:              ":8081",
+		Addr:              cfg.HTTPAddr,
 		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
-	log.Println("webhook server listening on :8081")
+	log.Printf(
+		"webhook server listening on %s",
+		cfg.HTTPAddr,
+	)
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
