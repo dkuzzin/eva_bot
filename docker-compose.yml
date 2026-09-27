@@ -36,5 +36,12 @@ services:
       - "127.0.0.1:8081:8081"
     restart: unless-stopped
 
+  miniapp:
+    build:
+      context: ./mini_app
+    ports:
+      - "127.0.0.1:8082:80"
+    restart: unless-stopped
+
 volumes:
   postgres_data:
