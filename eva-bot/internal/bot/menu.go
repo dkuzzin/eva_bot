@@ -13,10 +13,10 @@ const (
 	welcomeText = "Добро пожаловать в EVA"
 
 	createEventButtonText = "Создать мероприятие"
-	openAppButtonText     = "Открыть EVA"
+	profileButtonText     = "Посмотреть профиль"
 
-	maxBaseURL            = "https://max.ru"
-	createEventStartParam = "create_event"
+	createEventPayload = "create_event"
+	profilePayload     = "profile"
 )
 
 func (h *Handler) sendMainMenu(
@@ -27,16 +27,19 @@ func (h *Handler) sendMainMenu(
 
 	keyboard.
 		AddRow().
-		AddLink(
-			createEventButtonText,
-			h.createEventURL(),
-		)
+		AddButton(model.Button{
+			Type:      model.ButtonOpenApp,
+			Text:      createEventButtonText,
+			WebApp:    strings.TrimPrefix(h.botUsername, "@"),
+			ContactID: h.botID,
+			Payload:   createEventPayload,
+		})
 
 	keyboard.
 		AddRow().
-		AddOpenApp(
-			openAppButtonText,
-			h.botID,
+		AddCallBack(
+			profileButtonText,
+			profilePayload,
 		)
 
 	message := maxbot.NewMessage().
@@ -49,15 +52,4 @@ func (h *Handler) sendMainMenu(
 	}
 
 	return nil
-}
-
-func (h *Handler) createEventURL() string {
-	username := strings.TrimPrefix(h.botUsername, "@")
-
-	return fmt.Sprintf(
-		"%s/%s?startapp=%s",
-		maxBaseURL,
-		username,
-		createEventStartParam,
-	)
 }
