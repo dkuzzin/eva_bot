@@ -1,0 +1,23 @@
+.event-page {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.event-card {
+  width: 100%;
+}
+
+.event-card h1 {
+  margin-top: 0;
+}
+
+.event-description {
+  line-height: 1.5;
+}
+
+.event-info {
+  margin-top: 24px;
+}
