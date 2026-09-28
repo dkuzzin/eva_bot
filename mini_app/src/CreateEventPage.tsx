@@ -73,24 +73,28 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
             const createdEvent = await response.json()
 
             //TODO
-            const initData = window.WebApp.initData
+            const initData = window.WebApp?.initData
 
-            const botResponse = await fetch('/bot-api/events/created', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    eventId: createdEvent.id,
-                    initData,
-                }),
-            })
+            if (initData) {
+                const botResponse = await fetch('/bot-api/events/created', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        eventId: createdEvent.id,
+                        initData,
+                    }),
+                })
 
-            if (!botResponse.ok) {
-                console.error(
-                    'Не удалось отправить сообщение через бота:',
-                    botResponse.status
-                )
+                if (!botResponse.ok) {
+                    console.error(
+                        'Не удалось отправить сообщение через бота:',
+                        botResponse.status
+                    )
+                }
+            } else {
+                console.warn('Mini App открыт не через MAX: initData отсутствует')
             }
             //TODO
 
