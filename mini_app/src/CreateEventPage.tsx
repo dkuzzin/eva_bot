@@ -72,6 +72,28 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
 
             const createdEvent = await response.json()
 
+            //TODO
+            const initData = window.WebApp.initData
+
+            const botResponse = await fetch('/bot-api/events/created', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    eventId: createdEvent.id,
+                    initData,
+                }),
+            })
+
+            if (!botResponse.ok) {
+                console.error(
+                    'Не удалось отправить сообщение через бота:',
+                    botResponse.status
+                )
+            }
+            //TODO
+
             onCreated(createdEvent.id)
         } catch {
             setMessage('Не удалось связаться с сервером')
