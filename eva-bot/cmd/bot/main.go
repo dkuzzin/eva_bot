@@ -10,11 +10,14 @@ import (
 
 	"github.com/dkuzzin/eva_bot/internal/bot"
 	"github.com/dkuzzin/eva_bot/internal/config"
+	"github.com/dkuzzin/eva_bot/internal/eventapi"
+	"github.com/dkuzzin/eva_bot/internal/miniapp"
 )
 
 const (
-	webhookPath = "/webhook"
-
+	webhookPath       = "/webhook"
+	eventCreatedPath  = "/bot-api/events/created"
+	backendURL        = "http://server:8080"
 	httpClientTimeout = 10 * time.Second
 	readHeaderTimeout = 5 * time.Second
 )
@@ -25,11 +28,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	httpClient := &http.Client{
+		Timeout: httpClientTimeout,
+	}
+
 	api, err := maxbot.NewApi(
 		cfg.BotToken,
-		maxbot.WithHTTPClient(&http.Client{
-			Timeout: httpClientTimeout,
-		}),
+		maxbot.WithHTTPClient(httpClient),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -48,10 +53,21 @@ func main() {
 		botInfo.Username,
 	)
 
-	updateHandler := bot.NewHandler(
+	botHandler := bot.NewHandler(
 		api.Messages,
 		botInfo.UserID,
 		botInfo.Username,
+	)
+
+	eventClient := eventapi.NewClient(
+		backendURL,
+		httpClient,
+	)
+
+	miniAppHandler := miniapp.NewHandler(
+		cfg.BotToken,
+		eventClient,
+		botHandler,
 	)
 
 	mux := http.NewServeMux()
@@ -59,9 +75,14 @@ func main() {
 	mux.Handle(
 		webhookPath,
 		api.GetHandler(
-			updateHandler.HandleUpdate,
+			botHandler.HandleUpdate,
 			cfg.WebhookSecret,
 		),
+	)
+
+	mux.HandleFunc(
+		eventCreatedPath,
+		miniAppHandler.HandleEventCreated,
 	)
 
 	server := &http.Server{
