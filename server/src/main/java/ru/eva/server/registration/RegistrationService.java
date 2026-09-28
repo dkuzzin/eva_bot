@@ -2,14 +2,12 @@ package ru.eva.server.registration;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
-import ru.eva.exception.EventNotFoundException;
-import ru.eva.exception.InvalidRegistrationException;
-import ru.eva.exception.RegistrationNotAllowedException;
-import ru.eva.exception.RegistrationNotFoundException;
+import ru.eva.exception.*;
 import ru.eva.server.event.EventRepository;
 import ru.eva.server.event.model.Event;
 import ru.eva.server.event.model.EventStatus;
 import ru.eva.server.event.model.FormField;
+import ru.eva.server.registration.dto.EventRegistrationsResponse;
 import ru.eva.server.registration.dto.RegistrationRequest;
 import ru.eva.server.registration.dto.RegistrationResponse;
 import ru.eva.server.registration.model.Registration;
@@ -18,9 +16,7 @@ import ru.eva.server.registration.repository.RegistrationAnswerRepository;
 import ru.eva.server.registration.repository.RegistrationRepository;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class RegistrationService {
@@ -42,7 +38,7 @@ public class RegistrationService {
     public RegistrationResponse registration(Long eventId, RegistrationRequest request){
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
-        Long maxUserId = 1L;
+        Long maxUserId = getCurrentMaxUserId();
         validateRegistration(event, maxUserId);
         validateAnswers(event, request);
         Registration registration = new Registration(
@@ -118,7 +114,7 @@ public class RegistrationService {
                     "User is already registered"
             );
         }
-        //TODO fix maxuser id and add validation
+
         if (event.getCapacity() != null) {
             long registeredCount =
                     registrationRepository.countByEventId(event.getId());
@@ -134,7 +130,7 @@ public class RegistrationService {
 
     @Transactional
     public void cancelRegistration(Long eventId) {
-        Long maxUserId = 1L;
+        Long maxUserId = getCurrentMaxUserId();
 
         Registration registration =
                 registrationRepository.findByEventIdAndMaxUserId(eventId, maxUserId)
@@ -143,7 +139,7 @@ public class RegistrationService {
     }
 
     public RegistrationResponse getRegistration(Long eventId) {
-        Long maxUserId = 1L;
+        Long maxUserId = getCurrentMaxUserId();
 
         Registration registration = registrationRepository.findByEventIdAndMaxUserId(eventId, maxUserId)
                 .orElseThrow(() -> new RegistrationNotFoundException());
@@ -154,4 +150,84 @@ public class RegistrationService {
                 registration.getRegisteredAt()
         );
     }
+
+
+    public EventRegistrationsResponse getEventRegistrations(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        Long maxUserId = getCurrentMaxUserId();
+        validateEventOwner(event, maxUserId);
+
+        List<Registration> registrations =
+                registrationRepository.findByEventIdOrderByRegisteredAtAsc(eventId);
+
+        List<Long> registrationIds = new ArrayList<>();
+
+        for (Registration registration : registrations) {
+            registrationIds.add(registration.getId());
+        }
+
+        List<RegistrationAnswer> answers = new ArrayList<>();
+
+        if (!registrationIds.isEmpty()) {
+            answers = registrationAnswerRepository.findByRegistrationIdIn(registrationIds);
+        }
+
+        List<EventRegistrationsResponse.FormField> formFieldResponses =
+                new ArrayList<>();
+
+        for (FormField field : event.getFormFields()) {
+            formFieldResponses.add(
+                    new EventRegistrationsResponse.FormField(
+                            field.getId(),
+                            field.getLabel(),
+                            field.getPosition()
+                    )
+            );
+        }
+
+        List<EventRegistrationsResponse.Registration> registrationResponses =
+                new ArrayList<>();
+
+        for (Registration registration : registrations) {
+
+            List<EventRegistrationsResponse.Answer> answerResponses =
+                    new ArrayList<>();
+
+            for (RegistrationAnswer answer : answers) {
+                if (answer.getRegistrationId().equals(registration.getId())) {
+                    answerResponses.add(
+                            new EventRegistrationsResponse.Answer(
+                                    answer.getFormFieldId(),
+                                    answer.getValue()
+                            )
+                    );
+                }
+            }
+
+            registrationResponses.add(
+                    new EventRegistrationsResponse.Registration(
+                            registration.getId(),
+                            registration.getRegisteredAt(),
+                            answerResponses
+                    )
+            );
+        }
+
+        return new EventRegistrationsResponse(
+                event.getId(),
+                formFieldResponses,
+                registrationResponses
+        );
+    }
+    private Long getCurrentMaxUserId() {
+        return 1L;
+    }
+    private void validateEventOwner(Event event, Long maxUserId){
+        if (!event.getOwnerMaxUserId().equals(maxUserId)){
+            throw new EventAccessDeniedException(event.getId());
+        }
+    }
+
 }

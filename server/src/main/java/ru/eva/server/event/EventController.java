@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.eva.server.event.dto.CreateEventRequest;
 import ru.eva.server.event.dto.EventResponse;
 import ru.eva.server.registration.RegistrationService;
+import ru.eva.server.registration.dto.EventRegistrationsResponse;
 import ru.eva.server.registration.dto.RegistrationRequest;
 import ru.eva.server.registration.dto.RegistrationResponse;
 
@@ -50,5 +51,12 @@ public class EventController {
             @PathVariable Long eventId
     ) {
         return registrationService.getRegistration(eventId);
+    }
+
+    @GetMapping("/{eventId}/registrations")
+    public EventRegistrationsResponse getEventRegistrations(
+            @PathVariable Long eventId
+    ) {
+        return registrationService.getEventRegistrations(eventId);
     }
 }

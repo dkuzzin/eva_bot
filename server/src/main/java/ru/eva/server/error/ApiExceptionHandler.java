@@ -87,4 +87,14 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(error);
     }
+
+    @ExceptionHandler(EventAccessDeniedException.class)
+    public ResponseEntity<ApiError> handleEventAccessDenied(EventAccessDeniedException exception){
+        ApiError error = new ApiError(
+                "EVENT_ACCESS_DENIED",
+                exception.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
 }
