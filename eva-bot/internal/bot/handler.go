@@ -36,6 +36,15 @@ func (h *Handler) HandleUpdate(
 			log.Printf("send main menu: %v", err)
 		}
 
+	case model.UpdateMessageCreated:
+		command := update.GetCommand()
+
+		if command.Command == "/start" {
+			if err := h.sendMainMenu(ctx, update.ChatID); err != nil {
+				log.Printf("send main menu: %v", err)
+			}
+		}
+
 	case model.UpdateMessageCallback:
 		// Кнопка профиля пока ничего не делает.
 		return
