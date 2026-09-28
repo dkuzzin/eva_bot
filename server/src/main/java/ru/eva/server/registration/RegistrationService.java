@@ -230,4 +230,49 @@ public class RegistrationService {
         }
     }
 
+    public String exportEventRegistrations(Long eventId) {
+        EventRegistrationsResponse response = getEventRegistrations(eventId);
+
+        StringBuilder csv = new StringBuilder();
+
+        csv.append('\uFEFF');
+        csv.append("registrationId,registeredAt");
+
+        for (EventRegistrationsResponse.FormField field : response.formFields()) {
+            csv.append(",").append(escapeCsv(field.label()));
+        }
+
+        csv.append("\n");
+
+        for (EventRegistrationsResponse.Registration registration : response.registrations()) {
+            csv.append(escapeCsv(registration.id().toString()));
+            csv.append(",");
+            csv.append(escapeCsv(registration.registeredAt().toString()));
+
+            for (EventRegistrationsResponse.FormField field : response.formFields()) {
+                String value = "";
+
+                for (EventRegistrationsResponse.Answer answer : registration.answers()) {
+                    if (answer.fieldId().equals(field.id())) {
+                        value = answer.value();
+                        break;
+                    }
+                }
+
+                csv.append(",").append(escapeCsv(value));
+            }
+
+            csv.append("\n");
+        }
+
+        return csv.toString();
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        return "\"" + value.replace("\"", "\"\"") + "\"";
+    }
 }
