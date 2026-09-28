@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CreateEventPage from './CreateEventPage'
 import EventCreatedPage from './EventCreatedPage'
 import EventPage from './EventPage'
+import EventRegistrationsPage from './EventRegistrationsPage'
 
 function App() {
   const params = new URLSearchParams(window.location.search)
@@ -23,8 +24,23 @@ function App() {
   const [openedEventId, setOpenedEventId] =
     useState<number | null>(initialEventId)
 
+  const [registrationsEventId, setRegistrationsEventId] =
+    useState<number | null>(null)
+
+  if (registrationsEventId !== null) {
+    return (
+      <EventRegistrationsPage
+        eventId={registrationsEventId}
+      />
+    )
+  }
+
   if (openedEventId !== null) {
-    return <EventPage eventId={openedEventId} />
+    return (
+      <EventPage
+        eventId={openedEventId}
+      />
+    )
   }
 
   if (createdEventId !== null) {
@@ -33,6 +49,9 @@ function App() {
         eventId={createdEventId}
         onOpenEvent={() => {
           setOpenedEventId(createdEventId)
+        }}
+        onOpenRegistrations={() => {
+          setRegistrationsEventId(createdEventId)
         }}
       />
     )
