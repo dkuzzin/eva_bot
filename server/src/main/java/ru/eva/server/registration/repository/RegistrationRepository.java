@@ -5,6 +5,7 @@ package ru.eva.server.registration.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.eva.server.registration.model.Registration;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
@@ -14,4 +15,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     );
 
     long countByEventId(Long eventId);
+
+    List<Registration> findByEventIdOrderByRegisteredAtAsc(Long eventId);
 }

@@ -1,0 +1,88 @@
+.event-created-page {
+    min-height: 100vh;
+    padding: 32px 24px;
+    box-sizing: border-box;
+
+    background: linear-gradient(180deg,
+            rgba(110, 26, 255, 0.07) 0%,
+            rgba(149, 0, 255, 0.025) 220px,
+            #f8f7fa 520px);
+
+    color: #0d001a;
+}
+
+.event-created-card {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px;
+    box-sizing: border-box;
+
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(110, 26, 255, 0.13);
+    border-radius: 24px;
+
+    box-shadow: 0 10px 35px rgba(13, 0, 26, 0.06);
+}
+
+.event-created-card h1 {
+    margin: 0 0 16px;
+
+    font-size: 28px;
+    color: #40205f;
+}
+
+.event-created-card p {
+    line-height: 1.5;
+    color: #51465d;
+}
+
+.event-link {
+    margin: 24px 0;
+    padding: 14px;
+
+    overflow-wrap: anywhere;
+
+    background: rgba(110, 26, 255, 0.06);
+    border: 1px solid rgba(110, 26, 255, 0.18);
+    border-radius: 14px;
+}
+
+.event-created-card button {
+    width: 100%;
+    padding: 13px 18px;
+    margin-top: 12px;
+
+    font: inherit;
+    font-weight: 500;
+
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.event-created-card button:first-of-type {
+    color: #5b24a8;
+    background: rgba(110, 26, 255, 0.08);
+    border: 1px solid rgba(110, 26, 255, 0.18);
+}
+
+.event-created-card button:last-of-type {
+    color: white;
+    background: #6e1aff;
+    border: 1px solid #6e1aff;
+}
+
+@media (max-width: 600px) {
+    .event-created-page {
+        padding: 20px 14px;
+    }
+
+    .event-created-card {
+        padding: 22px 18px;
+        border-radius: 20px;
+    }
+
+    .event-created-card h1 {
+        font-size: 25px;
+    }
+}

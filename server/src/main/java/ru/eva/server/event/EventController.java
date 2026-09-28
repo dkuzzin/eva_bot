@@ -1,11 +1,14 @@
 package ru.eva.server.event;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.eva.server.event.dto.CreateEventRequest;
 import ru.eva.server.event.dto.EventResponse;
 import ru.eva.server.registration.RegistrationService;
+import ru.eva.server.registration.dto.EventRegistrationsResponse;
 import ru.eva.server.registration.dto.RegistrationRequest;
 import ru.eva.server.registration.dto.RegistrationResponse;
 
@@ -50,5 +53,28 @@ public class EventController {
             @PathVariable Long eventId
     ) {
         return registrationService.getRegistration(eventId);
+    }
+
+    @GetMapping("/{eventId}/registrations")
+    public EventRegistrationsResponse getEventRegistrations(
+            @PathVariable Long eventId
+    ) {
+        return registrationService.getEventRegistrations(eventId);
+    }
+
+    @GetMapping(
+            value = "/{eventId}/registrations/export",
+            produces = "text/csv;charset=UTF-8"
+    )
+    public ResponseEntity<String> exportRegistrations(
+            @PathVariable Long eventId
+    ) {
+        String csv = registrationService.exportEventRegistrations(eventId);
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"event-" + eventId + "-registrations.csv\""
+                ).body(csv);
     }
 }

@@ -50,6 +50,9 @@ function EventPage({ eventId }: EventPageProps) {
         useState<string | null>(null)
     const [registration, setRegistration] =
         useState<Registration | null>(null)
+    const [registrationLoading, setRegistrationLoading] = useState(true)
+    const [submitting, setSubmitting] = useState(false)
+    const [cancelling, setCancelling] = useState(false)
 
     async function loadEvent() {
         setLoading(true)
@@ -57,6 +60,11 @@ function EventPage({ eventId }: EventPageProps) {
 
         try {
             const response = await fetch(`/api/events/${eventId}`)
+
+            if (response.status === 404) {
+                setError('Мероприятие не найдено')
+                return
+            }
 
             if (!response.ok) {
                 setError('Не удалось загрузить мероприятие')
@@ -74,6 +82,8 @@ function EventPage({ eventId }: EventPageProps) {
     }
 
     async function loadRegistration() {
+        setRegistrationLoading(true)
+
         try {
             const response = await fetch(
                 `/api/events/${eventId}/registrations/me`
@@ -90,9 +100,16 @@ function EventPage({ eventId }: EventPageProps) {
                 return
             }
 
-            console.error('Не удалось загрузить регистрацию:', response.status)
+            console.error(
+                'Не удалось загрузить регистрацию:',
+                response.status
+            )
         } catch {
-            console.error('Не удалось связаться с сервером при загрузке регистрации')
+            console.error(
+                'Не удалось связаться с сервером при загрузке регистрации'
+            )
+        } finally {
+            setRegistrationLoading(false)
         }
     }
 
@@ -100,6 +117,18 @@ function EventPage({ eventId }: EventPageProps) {
         if (event === null) {
             return
         }
+
+        const hasEmptyAnswers = event.formFields.some(
+            (field) => (answers[field.id] ?? '').trim() === ''
+        )
+
+        if (hasEmptyAnswers) {
+            setRegistrationMessage('Заполните все поля')
+            return
+        }
+
+        setSubmitting(true)
+        setRegistrationMessage(null)
 
         const request = {
             answers: event.formFields.map((field) => ({
@@ -134,10 +163,15 @@ function EventPage({ eventId }: EventPageProps) {
             setRegistrationMessage(null)
         } catch {
             setRegistrationMessage('Не удалось связаться с сервером')
+        } finally {
+            setSubmitting(false)
         }
     }
 
     async function handleCancelRegistration() {
+        setCancelling(true)
+        setRegistrationMessage(null)
+
         try {
             const response = await fetch(
                 `/api/events/${eventId}/registrations`,
@@ -147,14 +181,16 @@ function EventPage({ eventId }: EventPageProps) {
             )
 
             if (!response.ok) {
-                console.error('Не удалось отменить регистрацию:', response.status)
+                setRegistrationMessage('Не удалось отменить регистрацию')
                 return
             }
 
             setRegistration(null)
             setAnswers({})
         } catch {
-            console.error('Не удалось связаться с сервером')
+            setRegistrationMessage('Не удалось связаться с сервером')
+        } finally {
+            setCancelling(false)
         }
     }
 
@@ -193,7 +229,12 @@ function EventPage({ eventId }: EventPageProps) {
                         )}
                     </div>
 
-                    {registration === null ? (
+                    {registrationLoading ? (
+                        <div className="registration-info">
+                            <h2>Регистрация</h2>
+                            <p>Проверяем регистрацию...</p>
+                        </div>
+                    ) : registration === null ? (
                         <div className="registration-form">
                             <h2>Регистрация</h2>
 
@@ -217,8 +258,12 @@ function EventPage({ eventId }: EventPageProps) {
                                 </div>
                             ))}
 
-                            <button type="button" onClick={handleSubmit}>
-                                Зарегистрироваться
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Регистрация...' : 'Зарегистрироваться'}
                             </button>
 
                             {registrationMessage !== null && (
@@ -233,9 +278,14 @@ function EventPage({ eventId }: EventPageProps) {
                             <button
                                 type="button"
                                 onClick={handleCancelRegistration}
+                                disabled={cancelling}
                             >
-                                Отменить регистрацию
+                                {cancelling ? 'Отмена...' : 'Отменить регистрацию'}
                             </button>
+
+                            {registrationMessage !== null && (
+                                <p>{registrationMessage}</p>
+                            )}
                         </div>
                     )}
 
