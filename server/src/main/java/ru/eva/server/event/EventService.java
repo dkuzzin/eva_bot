@@ -82,4 +82,14 @@ public class EventService {
                 formFields
         );
     }
+
+    public List<EventResponse> getMyEvents(Long maxUserId) {
+        List<Event> events = eventRepository.findByOwnerMaxUserIdOrderByStartsAtAsc(maxUserId);
+        List<EventResponse> responses = new ArrayList<>();
+
+        for (Event event : events){
+            responses.add(eventToResponse(event));
+        }
+        return responses;
+    }
 }

@@ -12,15 +12,19 @@ import ru.eva.server.registration.dto.EventRegistrationsResponse;
 import ru.eva.server.registration.dto.RegistrationRequest;
 import ru.eva.server.registration.dto.RegistrationResponse;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
+
     private final EventService eventService;
     private final RegistrationService registrationService;
+
+
     public EventController(EventService eventService, RegistrationService registrationService){
         this.eventService = eventService;
         this.registrationService = registrationService;
-
     }
 
     @PostMapping
@@ -31,6 +35,11 @@ public class EventController {
     @GetMapping("/{id}")
     public EventResponse getEvent(@PathVariable Long id){
         return eventService.get(id);
+    }
+
+    @GetMapping
+    public List<EventResponse> getMyEvents() {
+        return eventService.getMyEvents(getCurrentMaxUserId());
     }
 
     @PostMapping("/{eventId}/registrations")
@@ -70,7 +79,8 @@ public class EventController {
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"event-" + eventId + "-registrations.csv\"").body(csv);
+                        "attachment; filename=\"event-" + eventId + "-registrations.csv\""
+                ).body(csv);
     }
 
     private Long getCurrentMaxUserId() {
