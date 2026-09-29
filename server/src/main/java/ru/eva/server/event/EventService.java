@@ -25,8 +25,15 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    private void validateBusinessRules(CreateEventRequest request){
-        if (request.endsAt() != null && !request.endsAt().isAfter(request.startsAt())){
+    private void validateBusinessRules(CreateEventRequest request) {
+        if (!request.startsAt().isAfter(OffsetDateTime.now())) {
+            throw new InvalidEventArgumentsException(
+                    "EVENT_STARTS_IN_PAST",
+                    "startsAt must be in the future"
+            );
+        }
+
+        if (request.endsAt() != null && !request.endsAt().isAfter(request.startsAt())) {
             throw new InvalidEventArgumentsException(
                     "INVALID_EVENT_TIME_RANGE",
                     "endsAt must be after startsAt"
