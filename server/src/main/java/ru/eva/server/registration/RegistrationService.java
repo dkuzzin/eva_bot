@@ -228,17 +228,17 @@ public class RegistrationService {
         StringBuilder csv = new StringBuilder();
 
         csv.append('\uFEFF');
-        csv.append("registrationId,registeredAt");
+        csv.append("registrationId;registeredAt");
 
         for (EventRegistrationsResponse.FormField field : response.formFields()) {
-            csv.append(",").append(escapeCsv(field.label()));
+            csv.append(";").append(escapeCsv(field.label()));
         }
 
         csv.append("\n");
 
         for (EventRegistrationsResponse.Registration registration : response.registrations()) {
             csv.append(escapeCsv(registration.id().toString()));
-            csv.append(",");
+            csv.append(";");
             csv.append(escapeCsv(registration.registeredAt().toString()));
 
             for (EventRegistrationsResponse.FormField field : response.formFields()) {
@@ -251,7 +251,7 @@ public class RegistrationService {
                     }
                 }
 
-                csv.append(",").append(escapeCsv(value));
+                csv.append(";").append(escapeCsv(value));
             }
 
             csv.append("\n");
