@@ -14,6 +14,7 @@ import ru.eva.server.registration.model.Registration;
 import ru.eva.server.registration.model.RegistrationAnswer;
 import ru.eva.server.registration.repository.RegistrationAnswerRepository;
 import ru.eva.server.registration.repository.RegistrationRepository;
+import ru.eva.server.registration.dto.MyRegistrationResponse;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -265,5 +266,52 @@ public class RegistrationService {
         }
 
         return "\"" + value.replace("\"", "\"\"") + "\"";
+    }
+
+    public List<MyRegistrationResponse> getMyRegistrations(Long maxUserId) {
+        List<Registration> registrations =
+                registrationRepository.findByMaxUserId(maxUserId);
+
+        List<Long> eventIds = new ArrayList<>();
+
+        for (Registration registration : registrations) {
+            eventIds.add(registration.getEventId());
+        }
+
+        List<Event> events = eventRepository.findAllById(eventIds);
+
+        Map<Long, Event> eventsById = new HashMap<>();
+        for (Event event : events) {
+            eventsById.put(event.getId(), event);
+        }
+
+        List<MyRegistrationResponse> responses = new ArrayList<>();
+        for (Registration registration : registrations) {
+            Event event = eventsById.get(registration.getEventId());
+
+            MyRegistrationResponse.Event eventResponse =
+                    new MyRegistrationResponse.Event(
+                            event.getId(),
+                            event.getTitle(),
+                            event.getStartsAt(),
+                            event.getEndsAt(),
+                            event.getLocation(),
+                            event.getStatus()
+                    );
+
+            responses.add(
+                    new MyRegistrationResponse(
+                            registration.getId(),
+                            registration.getRegisteredAt(),
+                            eventResponse
+                    )
+            );
+        }
+
+        responses.sort(
+                Comparator.comparing(response -> response.event().startsAt())
+        );
+
+        return responses;
     }
 }
