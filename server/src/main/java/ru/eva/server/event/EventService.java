@@ -9,6 +9,9 @@ import ru.eva.server.event.dto.FormFieldRequest;
 import ru.eva.server.event.model.Event;
 import ru.eva.server.event.model.EventStatus;
 import ru.eva.server.event.model.FormField;
+import org.springframework.transaction.annotation.Transactional;
+import ru.eva.exception.EventAccessDeniedException;
+import ru.eva.exception.EventAlreadyCancelledException;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -91,5 +94,23 @@ public class EventService {
             responses.add(eventToResponse(event));
         }
         return responses;
+    }
+
+    @Transactional
+    public EventResponse cancel(Long eventId, Long maxUserId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        if (!event.getOwnerMaxUserId().equals(maxUserId)) {
+            throw new EventAccessDeniedException(eventId);
+        }
+
+        if (event.getStatus() == EventStatus.CANCELLED) {
+            throw new EventAlreadyCancelledException(eventId);
+        }
+
+        event.cancel(OffsetDateTime.now());
+
+        return eventToResponse(event);
     }
 }

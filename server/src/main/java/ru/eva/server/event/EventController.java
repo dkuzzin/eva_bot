@@ -83,7 +83,10 @@ public class EventController {
                 ).body(csv);
     }
 
-
+    @PatchMapping("/{eventId}/cancel")
+    public EventResponse cancelEvent(@PathVariable Long eventId) {
+        return eventService.cancel(eventId, getCurrentMaxUserId());
+    }
 
     private Long getCurrentMaxUserId() {
         return 1L;
