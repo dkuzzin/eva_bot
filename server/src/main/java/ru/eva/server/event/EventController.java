@@ -25,7 +25,7 @@ public class EventController {
 
     @PostMapping
     public EventResponse create(@Valid @RequestBody CreateEventRequest request) {
-        return eventService.create(request);
+        return eventService.create(request, getCurrentMaxUserId());
     }
 
     @GetMapping("/{id}")
@@ -38,43 +38,42 @@ public class EventController {
             @PathVariable Long eventId,
             @Valid @RequestBody RegistrationRequest request)
     {
-        return registrationService.registration(eventId, request);
+        return registrationService.registration(eventId, request, getCurrentMaxUserId());
     }
 
 
     @DeleteMapping("/{eventId}/registrations")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancelRegistration(@PathVariable Long eventId) {
-        registrationService.cancelRegistration(eventId);
+        registrationService.cancelRegistration(eventId, getCurrentMaxUserId());
     }
 
     @GetMapping("/{eventId}/registrations/me")
-    public RegistrationResponse getRegistration(
-            @PathVariable Long eventId
-    ) {
-        return registrationService.getRegistration(eventId);
+    public RegistrationResponse getRegistration(@PathVariable Long eventId) {
+        return registrationService.getRegistration(eventId, getCurrentMaxUserId());
     }
 
     @GetMapping("/{eventId}/registrations")
     public EventRegistrationsResponse getEventRegistrations(
             @PathVariable Long eventId
     ) {
-        return registrationService.getEventRegistrations(eventId);
+        return registrationService.getEventRegistrations(eventId, getCurrentMaxUserId());
     }
 
     @GetMapping(
             value = "/{eventId}/registrations/export",
             produces = "text/csv;charset=UTF-8"
     )
-    public ResponseEntity<String> exportRegistrations(
-            @PathVariable Long eventId
-    ) {
-        String csv = registrationService.exportEventRegistrations(eventId);
+    public ResponseEntity<String> exportRegistrations(@PathVariable Long eventId) {
+        String csv = registrationService.exportEventRegistrations(eventId, getCurrentMaxUserId());
 
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"event-" + eventId + "-registrations.csv\""
-                ).body(csv);
+                        "attachment; filename=\"event-" + eventId + "-registrations.csv\"").body(csv);
+    }
+
+    private Long getCurrentMaxUserId() {
+        return 1L;
     }
 }

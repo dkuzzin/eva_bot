@@ -35,10 +35,9 @@ public class RegistrationService {
     }
 
     @Transactional
-    public RegistrationResponse registration(Long eventId, RegistrationRequest request){
+    public RegistrationResponse registration(Long eventId, RegistrationRequest request, Long maxUserId){
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
-        Long maxUserId = getCurrentMaxUserId();
         validateRegistration(event, maxUserId);
         validateAnswers(event, request);
         Registration registration = new Registration(
@@ -129,17 +128,14 @@ public class RegistrationService {
     }
 
     @Transactional
-    public void cancelRegistration(Long eventId) {
-        Long maxUserId = getCurrentMaxUserId();
-
+    public void cancelRegistration(Long eventId, Long maxUserId) {
         Registration registration =
                 registrationRepository.findByEventIdAndMaxUserId(eventId, maxUserId)
                         .orElseThrow(RegistrationNotFoundException::new);
         registrationRepository.delete(registration);
     }
 
-    public RegistrationResponse getRegistration(Long eventId) {
-        Long maxUserId = getCurrentMaxUserId();
+    public RegistrationResponse getRegistration(Long eventId, Long maxUserId) {
 
         Registration registration = registrationRepository.findByEventIdAndMaxUserId(eventId, maxUserId)
                 .orElseThrow(() -> new RegistrationNotFoundException());
@@ -152,11 +148,9 @@ public class RegistrationService {
     }
 
 
-    public EventRegistrationsResponse getEventRegistrations(Long eventId) {
+    public EventRegistrationsResponse getEventRegistrations(Long eventId, Long maxUserId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
-
-        Long maxUserId = getCurrentMaxUserId();
         validateEventOwner(event, maxUserId);
 
         List<Registration> registrations =
@@ -221,17 +215,14 @@ public class RegistrationService {
                 registrationResponses
         );
     }
-    private Long getCurrentMaxUserId() {
-        return 1L;
-    }
     private void validateEventOwner(Event event, Long maxUserId){
         if (!event.getOwnerMaxUserId().equals(maxUserId)){
             throw new EventAccessDeniedException(event.getId());
         }
     }
 
-    public String exportEventRegistrations(Long eventId) {
-        EventRegistrationsResponse response = getEventRegistrations(eventId);
+    public String exportEventRegistrations(Long eventId, Long maxUserId) {
+        EventRegistrationsResponse response = getEventRegistrations(eventId, maxUserId);
 
         StringBuilder csv = new StringBuilder();
 

@@ -30,12 +30,12 @@ public class EventService {
             );
         }
     }
-    public EventResponse create(CreateEventRequest request){
+    public EventResponse create(CreateEventRequest request, Long maxUserId){
         validateBusinessRules(request);
 
         OffsetDateTime now = OffsetDateTime.now();
         Event event = new Event(
-                1L,
+                maxUserId,
                 request.title(),
                 request.description(),
                 request.startsAt(),
