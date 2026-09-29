@@ -12,20 +12,24 @@ import ru.eva.server.registration.dto.EventRegistrationsResponse;
 import ru.eva.server.registration.dto.RegistrationRequest;
 import ru.eva.server.registration.dto.RegistrationResponse;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
+
     private final EventService eventService;
     private final RegistrationService registrationService;
+
+
     public EventController(EventService eventService, RegistrationService registrationService){
         this.eventService = eventService;
         this.registrationService = registrationService;
-
     }
 
     @PostMapping
     public EventResponse create(@Valid @RequestBody CreateEventRequest request) {
-        return eventService.create(request);
+        return eventService.create(request, getCurrentMaxUserId());
     }
 
     @GetMapping("/{id}")
@@ -33,48 +37,58 @@ public class EventController {
         return eventService.get(id);
     }
 
+    @GetMapping
+    public List<EventResponse> getMyEvents() {
+        return eventService.getMyEvents(getCurrentMaxUserId());
+    }
+
     @PostMapping("/{eventId}/registrations")
     public RegistrationResponse registration(
             @PathVariable Long eventId,
             @Valid @RequestBody RegistrationRequest request)
     {
-        return registrationService.registration(eventId, request);
+        return registrationService.registration(eventId, request, getCurrentMaxUserId());
     }
 
 
     @DeleteMapping("/{eventId}/registrations")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancelRegistration(@PathVariable Long eventId) {
-        registrationService.cancelRegistration(eventId);
+        registrationService.cancelRegistration(eventId, getCurrentMaxUserId());
     }
 
     @GetMapping("/{eventId}/registrations/me")
-    public RegistrationResponse getRegistration(
-            @PathVariable Long eventId
-    ) {
-        return registrationService.getRegistration(eventId);
+    public RegistrationResponse getRegistration(@PathVariable Long eventId) {
+        return registrationService.getRegistration(eventId, getCurrentMaxUserId());
     }
 
     @GetMapping("/{eventId}/registrations")
     public EventRegistrationsResponse getEventRegistrations(
             @PathVariable Long eventId
     ) {
-        return registrationService.getEventRegistrations(eventId);
+        return registrationService.getEventRegistrations(eventId, getCurrentMaxUserId());
     }
 
     @GetMapping(
             value = "/{eventId}/registrations/export",
             produces = "text/csv;charset=UTF-8"
     )
-    public ResponseEntity<String> exportRegistrations(
-            @PathVariable Long eventId
-    ) {
-        String csv = registrationService.exportEventRegistrations(eventId);
+    public ResponseEntity<String> exportRegistrations(@PathVariable Long eventId) {
+        String csv = registrationService.exportEventRegistrations(eventId, getCurrentMaxUserId());
 
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"event-" + eventId + "-registrations.csv\""
                 ).body(csv);
+    }
+
+    @PatchMapping("/{eventId}/cancel")
+    public EventResponse cancelEvent(@PathVariable Long eventId) {
+        return eventService.cancel(eventId, getCurrentMaxUserId());
+    }
+
+    private Long getCurrentMaxUserId() {
+        return 1L;
     }
 }
