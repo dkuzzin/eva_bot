@@ -8,7 +8,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://api.chernushka.fun',
+        //target: 'https://api.chernushka.fun',
+        target: 'http://192.168.68.59:8080',
         changeOrigin: true,
       },
     },
