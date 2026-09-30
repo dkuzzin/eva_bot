@@ -15,12 +15,10 @@ const (
 	createEventButtonText     = "Создать мероприятие"
 	myEventsButtonText        = "Мои мероприятия"
 	myRegistrationsButtonText = "Мои регистрации"
-	profileButtonText         = "Посмотреть профиль"
 
 	createEventPayload     = "create_event"
 	myEventsPayload        = "my_events"
 	myRegistrationsPayload = "my_registrations"
-	profilePayload         = "profile"
 )
 
 func (h *Handler) sendMainMenu(
@@ -58,13 +56,6 @@ func (h *Handler) sendMainMenu(
 			ContactID: h.botID,
 			Payload:   myRegistrationsPayload,
 		})
-
-	keyboard.
-		AddRow().
-		AddCallBack(
-			profileButtonText,
-			profilePayload,
-		)
 
 	message := maxbot.NewMessage().
 		SetChat(chatID).
