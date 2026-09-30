@@ -25,7 +25,7 @@
   "registration": {
     "answers": [
       {
-        "field": "ФИО",
+        "fieldLabel": "ФИО",
         "value": "Иван Иванов"
       }
     ]
