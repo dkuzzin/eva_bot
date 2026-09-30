@@ -1,0 +1,308 @@
+.create-event-page {
+    min-height: 100vh;
+    padding: 32px 24px;
+    box-sizing: border-box;
+
+    background:
+        linear-gradient(180deg,
+            rgba(110, 26, 255, 0.07) 0%,
+            rgba(149, 0, 255, 0.025) 220px,
+            #f8f7fa 520px);
+
+    color: #0d001a;
+}
+
+.create-event-card {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px;
+    box-sizing: border-box;
+
+    background: rgba(255, 255, 255, 0.94);
+
+    border: 1px solid rgba(110, 26, 255, 0.13);
+    border-radius: 24px;
+
+    box-shadow:
+        0 10px 35px rgba(13, 0, 26, 0.06),
+        0 2px 8px rgba(110, 26, 255, 0.04);
+}
+
+
+/* Верхняя навигация */
+
+.create-event-navigation {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    margin-bottom: 28px !important;
+}
+
+.create-event-navigation .navigation-button {
+    width: 100%;
+    padding: 10px 14px;
+
+    color: #5b24a8;
+    background: rgba(110, 26, 255, 0.06);
+
+    border: 1px solid rgba(110, 26, 255, 0.16);
+    border-radius: 12px;
+}
+
+.create-event-navigation .navigation-button:hover {
+    background: rgba(110, 26, 255, 0.11);
+    border-color: rgba(110, 26, 255, 0.28);
+}
+
+
+/* Заголовки */
+
+.create-event-card h1 {
+    margin: 0 0 28px;
+
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 700;
+
+    color: #40205f;
+}
+
+.create-event-card h2 {
+    margin: 32px 0 20px;
+
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 700;
+
+    color: #40205f;
+}
+
+
+/* Поля формы */
+
+.create-event-card div {
+    margin-bottom: 20px;
+}
+
+.create-event-card label {
+    display: block;
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    color: #51465d;
+}
+
+.create-event-card input,
+.create-event-card textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 12px 14px;
+
+    font: inherit;
+    color: #0d001a;
+
+    background: rgba(110, 26, 255, 0.025);
+
+    border: 1px solid rgba(110, 26, 255, 0.20);
+    border-radius: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.create-event-card input:hover,
+.create-event-card textarea:hover {
+    border-color: rgba(110, 26, 255, 0.38);
+}
+
+.create-event-card input:focus,
+.create-event-card textarea:focus {
+    background: #ffffff;
+
+    border-color: #6e1aff;
+
+    box-shadow:
+        0 0 0 3px rgba(110, 26, 255, 0.10);
+}
+
+.create-event-card textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+
+/* Неизменяемое обязательное поле ФИО */
+
+.create-event-card input[readonly] {
+    color: #51465d;
+
+    background: rgba(13, 0, 26, 0.035);
+
+    border-color: rgba(13, 0, 26, 0.10);
+
+    cursor: default;
+}
+
+.create-event-card input[readonly]:hover {
+    border-color: rgba(13, 0, 26, 0.10);
+}
+
+.create-event-card input[readonly]:focus {
+    background: rgba(13, 0, 26, 0.035);
+
+    border-color: rgba(13, 0, 26, 0.10);
+
+    box-shadow: none;
+}
+
+
+/* Общие свойства кнопок */
+
+.create-event-card button {
+    box-sizing: border-box;
+
+    padding: 11px 16px;
+
+    font: inherit;
+    font-weight: 500;
+
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+}
+
+.create-event-card button:active {
+    transform: scale(0.98);
+}
+
+.create-event-card button:disabled {
+    cursor: default;
+    opacity: 0.55;
+    transform: none;
+}
+
+
+/* Удаление дополнительного вопроса */
+
+.remove-field-button {
+    display: block;
+
+    margin-top: 9px;
+
+    padding: 7px 11px !important;
+
+    font-size: 13px !important;
+    font-weight: 500 !important;
+
+    color: #a1263d;
+
+    background: rgba(190, 45, 72, 0.05);
+
+    border: 1px solid rgba(190, 45, 72, 0.18);
+
+    border-radius: 10px !important;
+}
+
+.remove-field-button:hover {
+    color: #8f1f34;
+
+    background: rgba(190, 45, 72, 0.10);
+
+    border-color: rgba(190, 45, 72, 0.30);
+}
+
+
+/* Добавление вопроса */
+
+.add-field-button {
+    display: block;
+
+    margin-top: 4px;
+    margin-bottom: 28px;
+
+    color: #5b24a8;
+
+    background: rgba(110, 26, 255, 0.08);
+
+    border: 1px solid rgba(110, 26, 255, 0.18);
+}
+
+.add-field-button:hover {
+    background: rgba(110, 26, 255, 0.13);
+
+    border-color: rgba(110, 26, 255, 0.30);
+}
+
+
+/* Основное действие */
+
+.create-event-button {
+    display: block;
+    width: 100%;
+
+    margin-top: 8px;
+
+    padding: 13px 18px !important;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(135deg,
+            #6e1aff,
+            #7d28e8);
+
+    border: 1px solid rgba(110, 26, 255, 0.7);
+
+    box-shadow:
+        0 6px 18px rgba(110, 26, 255, 0.18);
+}
+
+.create-event-button:hover {
+    background:
+        linear-gradient(135deg,
+            #6220dc,
+            #7624d9);
+
+    box-shadow:
+        0 8px 22px rgba(110, 26, 255, 0.24);
+}
+
+
+/* Телефон */
+
+@media (max-width: 600px) {
+    .create-event-page {
+        padding: 20px 14px;
+    }
+
+    .create-event-card {
+        padding: 22px 18px;
+
+        border-radius: 20px;
+    }
+
+    .create-event-card h1 {
+        font-size: 25px;
+    }
+
+    .create-event-navigation {
+        grid-template-columns: 1fr;
+
+        gap: 8px;
+    }
+}
