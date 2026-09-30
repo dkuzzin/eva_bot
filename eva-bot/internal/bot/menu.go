@@ -12,11 +12,15 @@ import (
 const (
 	welcomeText = "Добро пожаловать в EVA"
 
-	createEventButtonText = "Создать мероприятие"
-	profileButtonText     = "Посмотреть профиль"
+	createEventButtonText     = "Создать мероприятие"
+	myEventsButtonText        = "Мои мероприятия"
+	myRegistrationsButtonText = "Мои регистрации"
+	profileButtonText         = "Посмотреть профиль"
 
-	createEventPayload = "create_event"
-	profilePayload     = "profile"
+	createEventPayload     = "create_event"
+	myEventsPayload        = "my_events"
+	myRegistrationsPayload = "my_registrations"
+	profilePayload         = "profile"
 )
 
 func (h *Handler) sendMainMenu(
@@ -33,6 +37,26 @@ func (h *Handler) sendMainMenu(
 			WebApp:    strings.TrimPrefix(h.botUsername, "@"),
 			ContactID: h.botID,
 			Payload:   createEventPayload,
+		})
+
+	keyboard.
+		AddRow().
+		AddButton(model.Button{
+			Type:      model.ButtonOpenApp,
+			Text:      myEventsButtonText,
+			WebApp:    strings.TrimPrefix(h.botUsername, "@"),
+			ContactID: h.botID,
+			Payload:   myEventsPayload,
+		})
+
+	keyboard.
+		AddRow().
+		AddButton(model.Button{
+			Type:      model.ButtonOpenApp,
+			Text:      myRegistrationsButtonText,
+			WebApp:    strings.TrimPrefix(h.botUsername, "@"),
+			ContactID: h.botID,
+			Payload:   myRegistrationsPayload,
 		})
 
 	keyboard.
