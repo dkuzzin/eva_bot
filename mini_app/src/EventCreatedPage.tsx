@@ -4,12 +4,14 @@ type EventCreatedPageProps = {
     eventId: number
     onOpenEvent: () => void
     onOpenRegistrations: () => void
+    onOpenMyEvents: () => void
 }
 
 function EventCreatedPage({
     eventId,
     onOpenEvent,
     onOpenRegistrations,
+    onOpenMyEvents,
 }: EventCreatedPageProps) {
     const eventUrl =
         `${window.location.origin}/?eventId=${eventId}`
@@ -51,6 +53,13 @@ function EventCreatedPage({
                     onClick={onOpenRegistrations}
                 >
                     Участники и управление
+                </button>
+
+                <button
+                    type="button"
+                    onClick={onOpenMyEvents}
+                >
+                    Мои мероприятия
                 </button>
             </div>
         </main>

@@ -1,0 +1,313 @@
+.my-events-page {
+    min-height: 100vh;
+    padding: 32px 24px;
+    box-sizing: border-box;
+
+    background:
+        linear-gradient(180deg,
+            rgba(110, 26, 255, 0.07) 0%,
+            rgba(149, 0, 255, 0.025) 220px,
+            #f8f7fa 520px);
+
+    color: #0d001a;
+}
+
+.my-events-container {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.my-events-container>h1 {
+    margin: 0 0 24px;
+
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 700;
+
+    color: #40205f;
+}
+
+
+/* Создание нового мероприятия */
+
+.new-event-button {
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-bottom: 20px;
+    padding: 12px 16px;
+
+    font: inherit;
+    font-weight: 500;
+
+    color: #5b24a8;
+    background: rgba(110, 26, 255, 0.07);
+
+    border: 1px solid rgba(110, 26, 255, 0.18);
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.new-event-button:hover {
+    background: rgba(110, 26, 255, 0.12);
+    border-color: rgba(110, 26, 255, 0.30);
+}
+
+.new-event-button:active {
+    transform: scale(0.98);
+}
+
+
+/* Список мероприятий */
+
+.my-events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.my-event-card {
+    padding: 22px;
+    box-sizing: border-box;
+
+    background: rgba(255, 255, 255, 0.94);
+
+    border: 1px solid rgba(110, 26, 255, 0.13);
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 35px rgba(13, 0, 26, 0.06),
+        0 2px 8px rgba(110, 26, 255, 0.04);
+}
+
+.my-event-card-cancelled {
+    background: rgba(250, 248, 250, 0.94);
+}
+
+.my-event-card h2 {
+    margin: 0 0 14px;
+
+    font-size: 21px;
+    line-height: 1.3;
+    font-weight: 700;
+
+    color: #40205f;
+}
+
+
+/* Статус */
+
+.event-status {
+    display: inline-block;
+
+    margin: -4px 0 14px;
+    padding: 5px 9px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    border-radius: 999px;
+}
+
+.event-status-cancelled {
+    color: #a1263d;
+
+    background: rgba(190, 45, 72, 0.07);
+
+    border: 1px solid rgba(190, 45, 72, 0.18);
+}
+
+
+/* Информация о мероприятии */
+
+.my-event-info {
+    margin-bottom: 18px;
+}
+
+.my-event-info p {
+    margin: 6px 0;
+
+    font-size: 14px;
+    line-height: 1.45;
+
+    color: #51465d;
+}
+
+
+/* Кнопка управления мероприятием */
+
+.manage-event-button {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 12px 16px;
+
+    font: inherit;
+    font-weight: 500;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(135deg,
+            #6e1aff,
+            #7d28e8);
+
+    border: 1px solid rgba(110, 26, 255, 0.7);
+    border-radius: 14px;
+
+    box-shadow:
+        0 6px 18px rgba(110, 26, 255, 0.18);
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+}
+
+.manage-event-button:hover {
+    background:
+        linear-gradient(135deg,
+            #6220dc,
+            #7624d9);
+
+    box-shadow:
+        0 8px 22px rgba(110, 26, 255, 0.24);
+}
+
+.manage-event-button:active {
+    transform: scale(0.98);
+}
+
+
+/* Ссылка на регистрацию */
+
+.registration-link {
+    margin-top: 16px;
+    padding: 12px 14px;
+
+    background: rgba(110, 26, 255, 0.05);
+
+    border: 1px solid rgba(110, 26, 255, 0.12);
+    border-radius: 14px;
+}
+
+.registration-link-label {
+    display: block;
+    margin-bottom: 7px;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    color: #756a80;
+}
+
+.registration-link-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.registration-link-value {
+    flex: 1;
+    min-width: 0;
+
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.4;
+
+    color: #5b24a8;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Копирование ссылки */
+
+.copy-link-button {
+    flex-shrink: 0;
+
+    padding: 8px 11px;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+
+    color: #5b24a8;
+
+    background: rgba(110, 26, 255, 0.08);
+
+    border: 1px solid rgba(110, 26, 255, 0.18);
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.copy-link-button:hover {
+    background: rgba(110, 26, 255, 0.13);
+    border-color: rgba(110, 26, 255, 0.30);
+}
+
+.copy-link-button:active {
+    transform: scale(0.98);
+}
+
+
+/* Пустой список */
+
+.my-events-empty {
+    padding: 28px;
+
+    text-align: center;
+    color: #756a80;
+
+    background: rgba(255, 255, 255, 0.94);
+
+    border: 1px solid rgba(110, 26, 255, 0.13);
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 35px rgba(13, 0, 26, 0.06),
+        0 2px 8px rgba(110, 26, 255, 0.04);
+}
+
+
+/* Телефон */
+
+@media (max-width: 600px) {
+    .my-events-page {
+        padding: 20px 14px;
+    }
+
+    .my-events-container>h1 {
+        font-size: 25px;
+    }
+
+    .my-event-card {
+        padding: 19px 17px;
+        border-radius: 18px;
+    }
+
+    .registration-link-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .copy-link-button {
+        width: 100%;
+    }
+}
