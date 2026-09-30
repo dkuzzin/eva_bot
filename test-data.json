@@ -1,0 +1,33 @@
+{
+  "users": {
+    "organizer": {
+      "maxUserId": 1001,
+      "role": "organizer"
+    },
+    "participant": {
+      "maxUserId": 1002,
+      "role": "participant"
+    }
+  },
+  "event": {
+    "title": "EVA API technical check",
+    "description": "Temporary event for reproducible API verification",
+    "startsAt": "2099-01-15T10:00:00Z",
+    "endsAt": "2099-01-15T12:00:00Z",
+    "location": "Новосибирск",
+    "capacity": 20,
+    "formFields": [
+      {
+        "label": "ФИО"
+      }
+    ]
+  },
+  "registration": {
+    "answers": [
+      {
+        "field": "ФИО",
+        "value": "Иван Иванов"
+      }
+    ]
+  }
+}
