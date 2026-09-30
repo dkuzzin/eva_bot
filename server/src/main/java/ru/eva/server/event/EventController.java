@@ -28,8 +28,11 @@ public class EventController {
     }
 
     @PostMapping
-    public EventResponse create(@Valid @RequestBody CreateEventRequest request) {
-        return eventService.create(request, getCurrentMaxUserId());
+    public EventResponse create(
+            @Valid @RequestBody CreateEventRequest request,
+            @RequestHeader("X-Max-User-Id") Long maxUserId
+    ) {
+        return eventService.create(request, maxUserId);
     }
 
     @GetMapping("/{id}")
@@ -38,43 +41,54 @@ public class EventController {
     }
 
     @GetMapping
-    public List<EventResponse> getMyEvents() {
-        return eventService.getMyEvents(getCurrentMaxUserId());
+    public List<EventResponse> getMyEvents(@RequestHeader("X-Max-User-Id") Long maxUserId) {
+        return eventService.getMyEvents(maxUserId);
     }
 
     @PostMapping("/{eventId}/registrations")
     public RegistrationResponse registration(
             @PathVariable Long eventId,
-            @Valid @RequestBody RegistrationRequest request)
-    {
-        return registrationService.registration(eventId, request, getCurrentMaxUserId());
+            @Valid @RequestBody RegistrationRequest request,
+            @RequestHeader("X-Max-User-Id") Long maxUserId
+    ) {
+        return registrationService.registration(eventId, request, maxUserId);
     }
 
 
     @DeleteMapping("/{eventId}/registrations")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelRegistration(@PathVariable Long eventId) {
-        registrationService.cancelRegistration(eventId, getCurrentMaxUserId());
+    public void cancelRegistration(
+            @PathVariable Long eventId,
+            @RequestHeader("X-Max-User-Id") Long maxUserId
+    ) {
+        registrationService.cancelRegistration(eventId, maxUserId);
     }
 
     @GetMapping("/{eventId}/registrations/me")
-    public RegistrationResponse getRegistration(@PathVariable Long eventId) {
-        return registrationService.getRegistration(eventId, getCurrentMaxUserId());
+    public RegistrationResponse getRegistration(
+            @PathVariable Long eventId,
+            @RequestHeader("X-Max-User-Id") Long maxUserId
+    ) {
+        return registrationService.getRegistration(eventId, maxUserId);
     }
 
     @GetMapping("/{eventId}/registrations")
     public EventRegistrationsResponse getEventRegistrations(
-            @PathVariable Long eventId
+            @PathVariable Long eventId,
+            @RequestHeader("X-Max-User-Id") Long maxUserId
     ) {
-        return registrationService.getEventRegistrations(eventId, getCurrentMaxUserId());
+        return registrationService.getEventRegistrations(eventId, maxUserId);
     }
 
     @GetMapping(
             value = "/{eventId}/registrations/export",
             produces = "text/csv;charset=UTF-8"
     )
-    public ResponseEntity<String> exportRegistrations(@PathVariable Long eventId) {
-        String csv = registrationService.exportEventRegistrations(eventId, getCurrentMaxUserId());
+    public ResponseEntity<String> exportRegistrations(
+            @PathVariable Long eventId,
+            @RequestHeader("X-Max-User-Id") Long maxUserId
+    ) {
+        String csv = registrationService.exportEventRegistrations(eventId, maxUserId);
 
         return ResponseEntity.ok()
                 .header(
@@ -84,11 +98,10 @@ public class EventController {
     }
 
     @PatchMapping("/{eventId}/cancel")
-    public EventResponse cancelEvent(@PathVariable Long eventId) {
-        return eventService.cancel(eventId, getCurrentMaxUserId());
-    }
-
-    private Long getCurrentMaxUserId() {
-        return 1L;
+    public EventResponse cancelEvent(
+            @PathVariable Long eventId,
+            @RequestHeader("X-Max-User-Id") Long maxUserId
+    ) {
+        return eventService.cancel(eventId, maxUserId);
     }
 }
