@@ -194,7 +194,7 @@ checks:
         items:
           type: "object"
           required:
-            - "id"
+            - "registrationId"
             - "registeredAt"
             - "event"
     timeoutMs: 5000
@@ -234,6 +234,7 @@ checks:
         eventId: "${eventId}"
       headers:
         X-Max-User-Id: "1001"
+        Accept: "text/csv"
     expected:
       statusCodes: [200]
       contentType: "text/csv"
