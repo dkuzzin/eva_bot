@@ -29,6 +29,36 @@
         0 2px 8px rgba(110, 26, 255, 0.04);
 }
 
+
+/* Верхняя навигация */
+
+.create-event-navigation {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    margin-bottom: 28px !important;
+}
+
+.create-event-navigation .navigation-button {
+    width: 100%;
+    padding: 10px 14px;
+
+    color: #5b24a8;
+    background: rgba(110, 26, 255, 0.06);
+
+    border: 1px solid rgba(110, 26, 255, 0.16);
+    border-radius: 12px;
+}
+
+.create-event-navigation .navigation-button:hover {
+    background: rgba(110, 26, 255, 0.11);
+    border-color: rgba(110, 26, 255, 0.28);
+}
+
+
+/* Заголовки */
+
 .create-event-card h1 {
     margin: 0 0 28px;
 
@@ -48,6 +78,9 @@
 
     color: #40205f;
 }
+
+
+/* Поля формы */
 
 .create-event-card div {
     margin-bottom: 20px;
@@ -107,7 +140,32 @@
 }
 
 
-/* Кнопки */
+/* Неизменяемое обязательное поле ФИО */
+
+.create-event-card input[readonly] {
+    color: #51465d;
+
+    background: rgba(13, 0, 26, 0.035);
+
+    border-color: rgba(13, 0, 26, 0.10);
+
+    cursor: default;
+}
+
+.create-event-card input[readonly]:hover {
+    border-color: rgba(13, 0, 26, 0.10);
+}
+
+.create-event-card input[readonly]:focus {
+    background: rgba(13, 0, 26, 0.035);
+
+    border-color: rgba(13, 0, 26, 0.10);
+
+    box-shadow: none;
+}
+
+
+/* Общие свойства кнопок */
 
 .create-event-card button {
     box-sizing: border-box;
@@ -139,6 +197,36 @@
 }
 
 
+/* Удаление дополнительного вопроса */
+
+.remove-field-button {
+    display: block;
+
+    margin-top: 9px;
+
+    padding: 7px 11px !important;
+
+    font-size: 13px !important;
+    font-weight: 500 !important;
+
+    color: #a1263d;
+
+    background: rgba(190, 45, 72, 0.05);
+
+    border: 1px solid rgba(190, 45, 72, 0.18);
+
+    border-radius: 10px !important;
+}
+
+.remove-field-button:hover {
+    color: #8f1f34;
+
+    background: rgba(190, 45, 72, 0.10);
+
+    border-color: rgba(190, 45, 72, 0.30);
+}
+
+
 /* Добавление вопроса */
 
 .add-field-button {
@@ -156,6 +244,7 @@
 
 .add-field-button:hover {
     background: rgba(110, 26, 255, 0.13);
+
     border-color: rgba(110, 26, 255, 0.30);
 }
 
@@ -203,10 +292,17 @@
 
     .create-event-card {
         padding: 22px 18px;
+
         border-radius: 20px;
     }
 
     .create-event-card h1 {
         font-size: 25px;
+    }
+
+    .create-event-navigation {
+        grid-template-columns: 1fr;
+
+        gap: 8px;
     }
 }

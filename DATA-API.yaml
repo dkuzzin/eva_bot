@@ -1,0 +1,324 @@
+schemaVersion: "1.0"
+
+solution:
+  name: "EVA — Event Volunteer Assistant"
+  teamId: "Какая у меня специальность"
+
+api:
+  baseUrl: "https://api.chernushka.fun"
+  openapi: "./openapi.yaml"
+  defaultHeaders:
+    Accept: "application/json"
+
+checks:
+  - id: "create-event"
+    name: "Create test event"
+    method: "POST"
+    path: "/api/events"
+    role: "organizer"
+    request:
+      headers:
+        Content-Type: "application/json"
+        X-Max-User-Id: "1001"
+      body:
+        title: "EVA API technical check"
+        description: "Temporary event for reproducible API verification"
+        startsAt: "2099-01-15T10:00:00Z"
+        endsAt: "2099-01-15T12:00:00Z"
+        location: "Новосибирск"
+        capacity: 20
+        formFields:
+          - label: "ФИО"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields:
+        - "id"
+        - "title"
+        - "description"
+        - "startsAt"
+        - "endsAt"
+        - "location"
+        - "capacity"
+        - "status"
+        - "formFields"
+      bodySchema:
+        type: "object"
+        required:
+          - "id"
+          - "title"
+          - "startsAt"
+          - "status"
+          - "formFields"
+        properties:
+          id:
+            type: "integer"
+          title:
+            type: "string"
+          startsAt:
+            type: "string"
+          status:
+            type: "string"
+          formFields:
+            type: "array"
+    timeoutMs: 5000
+    repeatable: false
+    extract:
+      eventId: "$.id"
+      formFieldId: "$.formFields[0].id"
+
+  - id: "read-event"
+    name: "Read created event"
+    method: "GET"
+    path: "/api/events/{eventId}"
+    role: "public"
+    dependsOn:
+      - "create-event"
+    request:
+      path:
+        eventId: "${eventId}"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields:
+        - "id"
+        - "title"
+        - "startsAt"
+        - "status"
+        - "formFields"
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "list-own-events"
+    name: "Read organizer events"
+    method: "GET"
+    path: "/api/events"
+    role: "organizer"
+    dependsOn:
+      - "create-event"
+    request:
+      headers:
+        X-Max-User-Id: "1001"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      bodySchema:
+        type: "array"
+        items:
+          type: "object"
+          required:
+            - "id"
+            - "title"
+            - "startsAt"
+            - "status"
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "register-participant"
+    name: "Register participant"
+    method: "POST"
+    path: "/api/events/{eventId}/registrations"
+    role: "participant"
+    dependsOn:
+      - "create-event"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        Content-Type: "application/json"
+        X-Max-User-Id: "1002"
+      body:
+        answers:
+          - fieldId: "${formFieldId}"
+            value: "Иван Иванов"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields:
+        - "id"
+        - "eventId"
+        - "registeredAt"
+      bodySchema:
+        type: "object"
+        required:
+          - "id"
+          - "eventId"
+          - "registeredAt"
+        properties:
+          id:
+            type: "integer"
+          eventId:
+            type: "integer"
+          registeredAt:
+            type: "string"
+    timeoutMs: 5000
+    repeatable: false
+
+  - id: "read-own-registration"
+    name: "Read participant registration"
+    method: "GET"
+    path: "/api/events/{eventId}/registrations/me"
+    role: "participant"
+    dependsOn:
+      - "register-participant"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        X-Max-User-Id: "1002"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields:
+        - "id"
+        - "eventId"
+        - "registeredAt"
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "list-my-registrations"
+    name: "Read participant registrations"
+    method: "GET"
+    path: "/api/registrations/me"
+    role: "participant"
+    dependsOn:
+      - "register-participant"
+    request:
+      headers:
+        X-Max-User-Id: "1002"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      bodySchema:
+        type: "array"
+        items:
+          type: "object"
+          required:
+            - "id"
+            - "registeredAt"
+            - "event"
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "list-event-registrations"
+    name: "Read event registrations as organizer"
+    method: "GET"
+    path: "/api/events/{eventId}/registrations"
+    role: "organizer"
+    dependsOn:
+      - "register-participant"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        X-Max-User-Id: "1001"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields:
+        - "eventId"
+        - "formFields"
+        - "registrations"
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "export-registrations"
+    name: "Export event registrations"
+    method: "GET"
+    path: "/api/events/{eventId}/registrations/export"
+    role: "organizer"
+    dependsOn:
+      - "register-participant"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        X-Max-User-Id: "1001"
+    expected:
+      statusCodes: [200]
+      contentType: "text/csv"
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "duplicate-registration"
+    name: "Reject duplicate registration"
+    method: "POST"
+    path: "/api/events/{eventId}/registrations"
+    role: "participant"
+    dependsOn:
+      - "register-participant"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        Content-Type: "application/json"
+        X-Max-User-Id: "1002"
+      body:
+        answers:
+          - fieldId: "${formFieldId}"
+            value: "Иван Иванов"
+    expected:
+      statusCodes: [409]
+      contentType: "application/json"
+      requiredFields:
+        - "code"
+        - "message"
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "cancel-registration"
+    name: "Cancel participant registration"
+    method: "DELETE"
+    path: "/api/events/{eventId}/registrations"
+    role: "participant"
+    dependsOn:
+      - "read-own-registration"
+      - "list-my-registrations"
+      - "list-event-registrations"
+      - "export-registrations"
+      - "duplicate-registration"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        X-Max-User-Id: "1002"
+    expected:
+      statusCodes: [204]
+    timeoutMs: 5000
+    repeatable: false
+
+  - id: "verify-registration-deleted"
+    name: "Verify registration deletion"
+    method: "GET"
+    path: "/api/events/{eventId}/registrations/me"
+    role: "participant"
+    dependsOn:
+      - "cancel-registration"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        X-Max-User-Id: "1002"
+    expected:
+      statusCodes: [404]
+      contentType: "application/json"
+      requiredFields:
+        - "code"
+        - "message"
+    timeoutMs: 5000
+    repeatable: true
+
+cleanup:
+  - id: "cancel-test-event"
+    method: "PATCH"
+    path: "/api/events/{eventId}/cancel"
+    role: "organizer"
+    request:
+      path:
+        eventId: "${eventId}"
+      headers:
+        X-Max-User-Id: "1001"
+    expected:
+      statusCodes: [200, 409]
+      contentType: "application/json"
+    timeoutMs: 5000

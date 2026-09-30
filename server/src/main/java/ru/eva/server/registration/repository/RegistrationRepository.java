@@ -17,4 +17,5 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     long countByEventId(Long eventId);
 
     List<Registration> findByEventIdOrderByRegisteredAtAsc(Long eventId);
+    List<Registration> findByMaxUserId(Long maxUserId);
 }

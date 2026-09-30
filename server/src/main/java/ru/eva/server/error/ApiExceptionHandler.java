@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.eva.exception.*;
 
@@ -96,5 +97,15 @@ public class ApiExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(EventAlreadyCancelledException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleEventAlreadyCancelled(EventAlreadyCancelledException exception) {
+        return new ApiError(
+                "EVENT_ALREADY_CANCELLED",
+                exception.getMessage(),
+                null
+        );
     }
 }

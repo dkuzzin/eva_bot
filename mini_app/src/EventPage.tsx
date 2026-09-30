@@ -1,5 +1,6 @@
 import './EventPage.css'
 import { useEffect, useState } from 'react'
+import { getMaxUserHeaders } from './maxUser'
 
 type FormField = {
     id: number
@@ -27,6 +28,8 @@ type Registration = {
 
 type EventPageProps = {
     eventId: number
+    onBack?: () => void
+    onOpenMyRegistrations: () => void
 }
 
 function formatDateTime(value: string) {
@@ -41,7 +44,11 @@ function formatDateTime(value: string) {
     })
 }
 
-function EventPage({ eventId }: EventPageProps) {
+function EventPage({
+    eventId,
+    onBack,
+    onOpenMyRegistrations,
+}: EventPageProps) {
     const [event, setEvent] = useState<Event | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
@@ -86,7 +93,10 @@ function EventPage({ eventId }: EventPageProps) {
 
         try {
             const response = await fetch(
-                `/api/events/${eventId}/registrations/me`
+                `/api/events/${eventId}/registrations/me`,
+                {
+                    headers: getMaxUserHeaders(),
+                }
             )
 
             if (response.ok) {
@@ -144,6 +154,7 @@ function EventPage({ eventId }: EventPageProps) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        ...getMaxUserHeaders(),
                     },
                     body: JSON.stringify(request),
                 }
@@ -177,6 +188,7 @@ function EventPage({ eventId }: EventPageProps) {
                 `/api/events/${eventId}/registrations`,
                 {
                     method: 'DELETE',
+                    headers: getMaxUserHeaders(),
                 }
             )
 
@@ -207,6 +219,16 @@ function EventPage({ eventId }: EventPageProps) {
                 <p>{error}</p>
             ) : event !== null ? (
                 <article className="event-card">
+                    {onBack !== undefined && (
+                        <button
+                            className="event-back-button"
+                            type="button"
+                            onClick={onBack}
+                        >
+                            ← Мои регистрации
+                        </button>
+                    )}
+
                     <h1>{event.title}</h1>
 
                     <p className="event-description">
@@ -229,7 +251,14 @@ function EventPage({ eventId }: EventPageProps) {
                         )}
                     </div>
 
-                    {registrationLoading ? (
+                    {event.status === 'CANCELLED' ? (
+                        <div className="registration-info">
+                            <h2>Мероприятие отменено</h2>
+                            <p>
+                                Регистрация на это мероприятие недоступна.
+                            </p>
+                        </div>
+                    ) : registrationLoading ? (
                         <div className="registration-info">
                             <h2>Регистрация</h2>
                             <p>Проверяем регистрацию...</p>
@@ -259,6 +288,7 @@ function EventPage({ eventId }: EventPageProps) {
                             ))}
 
                             <button
+                                className="register-button"
                                 type="button"
                                 onClick={handleSubmit}
                                 disabled={submitting}
@@ -276,6 +306,15 @@ function EventPage({ eventId }: EventPageProps) {
                             <p>Вы зарегистрированы</p>
 
                             <button
+                                className="my-registrations-button"
+                                type="button"
+                                onClick={onOpenMyRegistrations}
+                            >
+                                Мои регистрации
+                            </button>
+
+                            <button
+                                className="cancel-registration-button"
                                 type="button"
                                 onClick={handleCancelRegistration}
                                 disabled={cancelling}

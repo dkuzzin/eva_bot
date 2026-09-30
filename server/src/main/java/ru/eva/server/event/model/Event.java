@@ -84,6 +84,11 @@ public class Event {
         formFields.add(formField);
     }
 
+    public void cancel(OffsetDateTime cancelledAt) {
+        this.status = EventStatus.CANCELLED;
+        this.updatedAt = cancelledAt;
+    }
+
     public Long getId() {
         return id;
     }

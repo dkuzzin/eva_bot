@@ -1,21 +1,31 @@
 import './CreateEventPage.css'
 import { useState } from 'react'
+import { getMaxUserHeaders } from './maxUser'
 
 type CreateEventPageProps = {
     onCreated: (eventId: number) => void
+    onOpenMyEvents: () => void
+    onOpenMyRegistrations: () => void
 }
 
-function CreateEventPage({ onCreated }: CreateEventPageProps) {
+function CreateEventPage({
+    onCreated,
+    onOpenMyEvents,
+    onOpenMyRegistrations,
+}: CreateEventPageProps) {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [startsAt, setStartsAt] = useState('')
     const [endsAt, setEndsAt] = useState('')
     const [location, setLocation] = useState('')
     const [capacity, setCapacity] = useState('')
-    const [formFields, setFormFields] = useState<string[]>([''])
+
+    // Первое поле формы всегда "ФИО".
+    // Куратор не может изменить или удалить его.
+    const [formFields, setFormFields] = useState<string[]>(['ФИО'])
+
     const [message, setMessage] = useState<string | null>(null)
     const [creating, setCreating] = useState(false)
-
 
     async function handleCreateEvent() {
         if (title.trim() === '') {
@@ -33,11 +43,6 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
             return
         }
 
-        if (formFields.some((field) => field.trim() === '')) {
-            setMessage('Заполните все вопросы формы регистрации')
-            return
-        }
-
         setCreating(true)
         setMessage(null)
 
@@ -45,12 +50,26 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
             title,
             description,
             startsAt: new Date(startsAt).toISOString(),
-            endsAt: endsAt === '' ? null : new Date(endsAt).toISOString(),
-            location: location === '' ? null : location,
-            capacity: capacity === '' ? null : Number(capacity),
-            formFields: formFields.map((label) => ({
-                label,
-            })),
+            endsAt:
+                endsAt === ''
+                    ? null
+                    : new Date(endsAt).toISOString(),
+            location:
+                location === ''
+                    ? null
+                    : location,
+            capacity:
+                capacity === ''
+                    ? null
+                    : Number(capacity),
+
+            // Пустые дополнительные вопросы не отправляем.
+            // "ФИО" всегда находится первым элементом и не может быть пустым.
+            formFields: formFields
+                .filter((label) => label.trim() !== '')
+                .map((label) => ({
+                    label: label.trim(),
+                })),
         }
 
         try {
@@ -58,6 +77,7 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...getMaxUserHeaders(),
                 },
                 body: JSON.stringify(request),
             })
@@ -72,20 +92,25 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
 
             const createdEvent = await response.json()
 
-            //TODO
+            // TODO: интеграция с Go-ботом.
+            // После создания мероприятия Mini App сообщает боту
+            // eventId, чтобы бот мог отправить куратору сообщение.
             const initData = window.WebApp?.initData
 
             if (initData) {
-                const botResponse = await fetch('/bot-api/events/created', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        eventId: createdEvent.id,
-                        initData,
-                    }),
-                })
+                const botResponse = await fetch(
+                    '/bot-api/events/created',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            eventId: createdEvent.id,
+                            initData,
+                        }),
+                    }
+                )
 
                 if (!botResponse.ok) {
                     console.error(
@@ -94,9 +119,10 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
                     )
                 }
             } else {
-                console.warn('Mini App открыт не через MAX: initData отсутствует')
+                console.warn(
+                    'Mini App открыт не через MAX: initData отсутствует'
+                )
             }
-            //TODO
 
             onCreated(createdEvent.id)
         } catch {
@@ -106,10 +132,28 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
         }
     }
 
-
     return (
         <main className="create-event-page">
             <div className="create-event-card">
+
+                <div className="create-event-navigation">
+                    <button
+                        className="navigation-button"
+                        type="button"
+                        onClick={onOpenMyEvents}
+                    >
+                        Мои мероприятия
+                    </button>
+
+                    <button
+                        className="navigation-button"
+                        type="button"
+                        onClick={onOpenMyRegistrations}
+                    >
+                        Мои регистрации
+                    </button>
+                </div>
+
                 <h1>Создать мероприятие</h1>
 
                 <div>
@@ -121,7 +165,9 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
                         id="title"
                         type="text"
                         value={title}
-                        onChange={(event) => setTitle(event.target.value)}
+                        onChange={(event) => {
+                            setTitle(event.target.value)
+                        }}
                     />
                 </div>
 
@@ -133,52 +179,70 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
                     <textarea
                         id="description"
                         value={description}
-                        onChange={(event) => setDescription(event.target.value)}
+                        onChange={(event) => {
+                            setDescription(event.target.value)
+                        }}
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="startsAt">Начало</label>
+                    <label htmlFor="startsAt">
+                        Начало
+                    </label>
 
                     <input
                         id="startsAt"
                         type="datetime-local"
                         value={startsAt}
-                        onChange={(event) => setStartsAt(event.target.value)}
+                        onChange={(event) => {
+                            setStartsAt(event.target.value)
+                        }}
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="endsAt">Окончание</label>
+                    <label htmlFor="endsAt">
+                        Окончание
+                    </label>
 
                     <input
                         id="endsAt"
                         type="datetime-local"
                         value={endsAt}
-                        onChange={(event) => setEndsAt(event.target.value)}
+                        onChange={(event) => {
+                            setEndsAt(event.target.value)
+                        }}
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="location">Место</label>
+                    <label htmlFor="location">
+                        Место
+                    </label>
 
                     <input
                         id="location"
                         type="text"
                         value={location}
-                        onChange={(event) => setLocation(event.target.value)}
+                        onChange={(event) => {
+                            setLocation(event.target.value)
+                        }}
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="capacity">Количество мест</label>
+                    <label htmlFor="capacity">
+                        Количество мест
+                    </label>
 
                     <input
                         id="capacity"
                         type="number"
                         min="1"
                         value={capacity}
-                        onChange={(event) => setCapacity(event.target.value)}
+                        onChange={(event) => {
+                            setCapacity(event.target.value)
+                        }}
                     />
                 </div>
 
@@ -187,27 +251,39 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
                 {formFields.map((field, index) => (
                     <div key={index}>
                         <label htmlFor={`form-field-${index}`}>
-                            Вопрос {index + 1}
+                            {index === 0
+                                ? 'Обязательное поле'
+                                : `Вопрос ${index + 1}`}
                         </label>
 
                         <input
                             id={`form-field-${index}`}
                             type="text"
                             value={field}
+                            readOnly={index === 0}
                             onChange={(event) => {
+                                if (index === 0) {
+                                    return
+                                }
+
                                 const newFormFields = [...formFields]
-                                newFormFields[index] = event.target.value
+
+                                newFormFields[index] =
+                                    event.target.value
+
                                 setFormFields(newFormFields)
                             }}
                         />
 
-                        {formFields.length > 1 && (
+                        {index !== 0 && (
                             <button
+                                className="remove-field-button"
                                 type="button"
                                 onClick={() => {
                                     setFormFields(
                                         formFields.filter(
-                                            (_, fieldIndex) => fieldIndex !== index
+                                            (_, fieldIndex) =>
+                                                fieldIndex !== index
                                         )
                                     )
                                 }}
@@ -222,7 +298,10 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
                     className="add-field-button"
                     type="button"
                     onClick={() => {
-                        setFormFields([...formFields, ''])
+                        setFormFields([
+                            ...formFields,
+                            '',
+                        ])
                     }}
                 >
                     + Добавить вопрос
@@ -234,7 +313,9 @@ function CreateEventPage({ onCreated }: CreateEventPageProps) {
                     onClick={handleCreateEvent}
                     disabled={creating}
                 >
-                    {creating ? 'Создание...' : 'Создать мероприятие'}
+                    {creating
+                        ? 'Создание...'
+                        : 'Создать мероприятие'}
                 </button>
 
                 {message !== null && (

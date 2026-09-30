@@ -1,0 +1,556 @@
+openapi: 3.1.0
+
+info:
+  title: EVA Backend API
+  version: 1.0.0
+  description: |
+    HTTP API проекта EVA (Event Volunteer Assistant).
+
+    API используется MAX Mini App для работы с мероприятиями
+    и регистрациями участников.
+
+servers:
+  - url: https://api.chernushka.fun
+
+paths:
+  /api/events:
+    post:
+      summary: Создать мероприятие
+      operationId: createEvent
+      parameters:
+        - $ref: '#/components/parameters/MaxUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '200':
+          description: Мероприятие успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          description: Некорректные данные мероприятия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    get:
+      summary: Получить мероприятия текущего пользователя
+      operationId: getMyEvents
+      parameters:
+        - $ref: '#/components/parameters/MaxUserId'
+      responses:
+        '200':
+          description: Список мероприятий, созданных текущим пользователем
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventResponse'
+
+  /api/events/{eventId}:
+    get:
+      summary: Получить мероприятие
+      operationId: getEvent
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+      responses:
+        '200':
+          description: Информация о мероприятии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          description: Мероприятие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/events/{eventId}/cancel:
+    patch:
+      summary: Отменить мероприятие
+      operationId: cancelEvent
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+        - $ref: '#/components/parameters/MaxUserId'
+      responses:
+        '200':
+          description: Мероприятие отменено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '403':
+          description: Текущий пользователь не является владельцем мероприятия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Мероприятие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Мероприятие уже отменено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/events/{eventId}/registrations:
+    post:
+      summary: Зарегистрироваться на мероприятие
+      operationId: registerForEvent
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+        - $ref: '#/components/parameters/MaxUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '200':
+          description: Регистрация успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          description: Некорректные ответы регистрационной формы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Мероприятие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Регистрация невозможна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    get:
+      summary: Получить регистрации на мероприятие
+      operationId: getEventRegistrations
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+        - $ref: '#/components/parameters/MaxUserId'
+      responses:
+        '200':
+          description: Список зарегистрированных участников и их ответов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventRegistrationsResponse'
+        '403':
+          description: Текущий пользователь не является владельцем мероприятия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Мероприятие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      summary: Отменить свою регистрацию
+      operationId: cancelRegistration
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+        - $ref: '#/components/parameters/MaxUserId'
+      responses:
+        '204':
+          description: Регистрация удалена
+        '404':
+          description: Регистрация не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/events/{eventId}/registrations/me:
+    get:
+      summary: Получить свою регистрацию на мероприятие
+      operationId: getMyEventRegistration
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+        - $ref: '#/components/parameters/MaxUserId'
+      responses:
+        '200':
+          description: Регистрация текущего пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '404':
+          description: Регистрация не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/events/{eventId}/registrations/export:
+    get:
+      summary: Скачать регистрации на мероприятие в CSV
+      operationId: exportEventRegistrations
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+        - $ref: '#/components/parameters/MaxUserId'
+      responses:
+        '200':
+          description: CSV-файл со списком участников
+          headers:
+            Content-Disposition:
+              description: Имя скачиваемого CSV-файла
+              schema:
+                type: string
+          content:
+            text/csv:
+              schema:
+                type: string
+        '403':
+          description: Текущий пользователь не является владельцем мероприятия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Мероприятие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/registrations/me:
+    get:
+      summary: Получить все регистрации текущего пользователя
+      operationId: getMyRegistrations
+      parameters:
+        - $ref: '#/components/parameters/MaxUserId'
+      responses:
+        '200':
+          description: Список регистраций вместе с краткой информацией о мероприятиях
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyRegistrationResponse'
+
+components:
+  parameters:
+    EventId:
+      name: eventId
+      in: path
+      required: true
+      description: Идентификатор мероприятия
+      schema:
+        type: integer
+        format: int64
+
+    MaxUserId:
+      name: X-Max-User-Id
+      in: header
+      required: true
+      description: Идентификатор текущего пользователя MAX
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+    CreateEventRequest:
+      type: object
+      required:
+        - title
+        - startsAt
+        - formFields
+      properties:
+        title:
+          type: string
+        description:
+          type:
+            - string
+            - "null"
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        location:
+          type:
+            - string
+            - "null"
+        capacity:
+          type:
+            - integer
+            - "null"
+          minimum: 1
+        formFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormFieldRequest'
+
+    FormFieldRequest:
+      type: object
+      required:
+        - label
+      properties:
+        label:
+          type: string
+
+    EventResponse:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - startsAt
+        - endsAt
+        - location
+        - capacity
+        - status
+        - formFields
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type:
+            - string
+            - "null"
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        location:
+          type:
+            - string
+            - "null"
+        capacity:
+          type:
+            - integer
+            - "null"
+        status:
+          $ref: '#/components/schemas/EventStatus'
+        formFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventFormField'
+
+    EventFormField:
+      type: object
+      required:
+        - id
+        - label
+        - position
+      properties:
+        id:
+          type: integer
+          format: int64
+        label:
+          type: string
+        position:
+          type: integer
+
+    EventStatus:
+      type: string
+      enum:
+        - OPEN
+        - CLOSED
+        - CANCELLED
+
+    RegistrationRequest:
+      type: object
+      required:
+        - answers
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegistrationAnswerRequest'
+
+    RegistrationAnswerRequest:
+      type: object
+      required:
+        - fieldId
+        - value
+      properties:
+        fieldId:
+          type: integer
+          format: int64
+          minimum: 1
+        value:
+          type: string
+
+    RegistrationResponse:
+      type: object
+      required:
+        - id
+        - eventId
+        - registeredAt
+      properties:
+        id:
+          type: integer
+          format: int64
+        eventId:
+          type: integer
+          format: int64
+        registeredAt:
+          type: string
+          format: date-time
+
+    EventRegistrationsResponse:
+      type: object
+      required:
+        - eventId
+        - formFields
+        - registrations
+      properties:
+        eventId:
+          type: integer
+          format: int64
+        formFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventFormField'
+        registrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventRegistration'
+
+    EventRegistration:
+      type: object
+      required:
+        - id
+        - registeredAt
+        - answers
+      properties:
+        id:
+          type: integer
+          format: int64
+        registeredAt:
+          type: string
+          format: date-time
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegistrationAnswerResponse'
+
+    RegistrationAnswerResponse:
+      type: object
+      required:
+        - fieldId
+        - value
+      properties:
+        fieldId:
+          type: integer
+          format: int64
+        value:
+          type: string
+
+    MyRegistrationResponse:
+      type: object
+      required:
+        - registrationId
+        - registeredAt
+        - event
+      properties:
+        registrationId:
+          type: integer
+          format: int64
+        registeredAt:
+          type: string
+          format: date-time
+        event:
+          $ref: '#/components/schemas/MyRegistrationEvent'
+
+    MyRegistrationEvent:
+      type: object
+      required:
+        - id
+        - title
+        - startsAt
+        - endsAt
+        - location
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        location:
+          type:
+            - string
+            - "null"
+        status:
+          $ref: '#/components/schemas/EventStatus'
+
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - INVALID_EVENT_TIME_RANGE
+            - EVENT_STARTS_IN_PAST
+            - EVENT_NOT_FOUND
+            - EVENT_ACCESS_DENIED
+            - EVENT_ALREADY_CANCELLED
+            - INVALID_REGISTRATION_FORM
+            - DUPLICATE_FORM_FIELD
+            - FORM_FIELD_DOESNT_EXIST
+            - EVENT_NOT_OPEN
+            - EVENT_CAPACITY_FULL
+            - ALREADY_REGISTERED
+            - REGISTRATION_NOT_FOUND
+            - DATA_INTEGRITY_VIOLATION
+        message:
+          type: string
+        fields:
+          type:
+            - object
+            - "null"
+          additionalProperties:
+            type: string

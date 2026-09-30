@@ -9,6 +9,9 @@ import ru.eva.server.event.dto.FormFieldRequest;
 import ru.eva.server.event.model.Event;
 import ru.eva.server.event.model.EventStatus;
 import ru.eva.server.event.model.FormField;
+import org.springframework.transaction.annotation.Transactional;
+import ru.eva.exception.EventAccessDeniedException;
+import ru.eva.exception.EventAlreadyCancelledException;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -22,20 +25,27 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    private void validateBusinessRules(CreateEventRequest request){
-        if (request.endsAt() != null && !request.endsAt().isAfter(request.startsAt())){
+    private void validateBusinessRules(CreateEventRequest request) {
+        if (!request.startsAt().isAfter(OffsetDateTime.now())) {
+            throw new InvalidEventArgumentsException(
+                    "EVENT_STARTS_IN_PAST",
+                    "startsAt must be in the future"
+            );
+        }
+
+        if (request.endsAt() != null && !request.endsAt().isAfter(request.startsAt())) {
             throw new InvalidEventArgumentsException(
                     "INVALID_EVENT_TIME_RANGE",
                     "endsAt must be after startsAt"
             );
         }
     }
-    public EventResponse create(CreateEventRequest request){
+    public EventResponse create(CreateEventRequest request, Long maxUserId){
         validateBusinessRules(request);
 
         OffsetDateTime now = OffsetDateTime.now();
         Event event = new Event(
-                1L,
+                maxUserId,
                 request.title(),
                 request.description(),
                 request.startsAt(),
@@ -81,5 +91,33 @@ public class EventService {
                 event.getStatus(),
                 formFields
         );
+    }
+
+    public List<EventResponse> getMyEvents(Long maxUserId) {
+        List<Event> events = eventRepository.findByOwnerMaxUserIdOrderByStartsAtAsc(maxUserId);
+        List<EventResponse> responses = new ArrayList<>();
+
+        for (Event event : events){
+            responses.add(eventToResponse(event));
+        }
+        return responses;
+    }
+
+    @Transactional
+    public EventResponse cancel(Long eventId, Long maxUserId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        if (!event.getOwnerMaxUserId().equals(maxUserId)) {
+            throw new EventAccessDeniedException(eventId);
+        }
+
+        if (event.getStatus() == EventStatus.CANCELLED) {
+            throw new EventAlreadyCancelledException(eventId);
+        }
+
+        event.cancel(OffsetDateTime.now());
+
+        return eventToResponse(event);
     }
 }
