@@ -83,7 +83,7 @@ function MyEventsPage({
                     <div className="my-events-list">
                         {events.map((event) => {
                             const registrationUrl =
-                                `${window.location.origin}/?eventId=${event.id}`
+                                `https://max.ru/t155_hakaton_max_bot?startapp=event_${event.id}`
 
                             const isCancelled = event.status === 'CANCELLED'
 

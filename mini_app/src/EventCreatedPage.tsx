@@ -14,7 +14,7 @@ function EventCreatedPage({
     onOpenMyEvents,
 }: EventCreatedPageProps) {
     const eventUrl =
-        `${window.location.origin}/?eventId=${eventId}`
+        `https://max.ru/t155_hakaton_max_bot?startapp=event_${eventId}`
 
     async function handleCopyLink() {
         await navigator.clipboard.writeText(eventUrl)
